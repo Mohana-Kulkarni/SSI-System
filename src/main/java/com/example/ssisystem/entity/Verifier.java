@@ -1,0 +1,77 @@
+package com.example.ssisystem.entity;
+
+import java.util.List;
+
+public class Verifier {
+    private String id;
+
+    private String name;
+    private String govId;
+    private List<String> trustedIssuer;
+    private String privateDid;
+    private String publicDid;
+
+    public Verifier() {
+    }
+
+    public Verifier(String name, String govId) {
+        this.name = name;
+        this.govId = govId;
+    }
+
+    public Verifier(String id, String name, String govId, List<String> trustedIssuer, String privateDid, String publicDid) {
+        this.id = id;
+        this.name = name;
+        this.govId = govId;
+        this.trustedIssuer = trustedIssuer;
+        this.privateDid = privateDid;
+        this.publicDid = publicDid;
+    }
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getPrivateDid() {
+        return privateDid;
+    }
+
+    public void setPrivateDid(String privateDid) {
+        this.privateDid = privateDid;
+    }
+
+    public String getPublicDid() {
+        return publicDid;
+    }
+
+    public void setPublicDid(String publicDid) {
+        this.publicDid = publicDid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getGovId() {
+        return govId;
+    }
+
+    public void setGovId(String govId) {
+        this.govId = govId;
+    }
+
+    public List<String> getTrustedIssuer() {
+        return trustedIssuer;
+    }
+
+    public void setTrustedIssuer(List<String> trustedIssuer) {
+        this.trustedIssuer = trustedIssuer;
+    }
+}
