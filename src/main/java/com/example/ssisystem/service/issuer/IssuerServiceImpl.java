@@ -2,6 +2,7 @@ package com.example.ssisystem.service.issuer;
 
 import com.example.ssisystem.entity.Issuer;
 import com.example.ssisystem.entity.UserDetails;
+import com.example.ssisystem.entity.UserResponse;
 import com.example.ssisystem.entity.VerifiableCredentials;
 import com.example.ssisystem.service.did.DIDService;
 import com.example.ssisystem.service.vc.VCService;
@@ -13,7 +14,9 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.faunadb.client.query.Language.*;
@@ -36,18 +39,18 @@ public class IssuerServiceImpl implements IssuerService{
     public void addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         String name = issuer.getName();
         String govId = issuer.getGovId();
+        Map<String, Object> map = new HashMap<>();
+        map .put("name", name);
+        map.put("govId", govId);
+        map.put("privateDid", didServices.generatePrivateDid());
+        map.put("publicDid", didServices.generatePublicDid());
+        map.put("pending_requests", new ArrayList<>());
+        map.put("issuedVCs", new ArrayList<>());
         faunaClient.query(
                 Create(
                         Collection("Issuer"),
                         Obj(
-                                "data",
-                                Obj(
-                                        "name", Value(name),
-                                        "govId", Value(govId),
-                                        "privateDid", Value(didServices.generatePrivateDid()),
-                                        "publicDid", Value(didServices.generatePublicDid()),
-                                        "issuedVCs", Value(new ArrayList<>())
-                                )
+                                "data", Value(map)
                         )
                 )
         );
@@ -58,9 +61,10 @@ public class IssuerServiceImpl implements IssuerService{
         Value res = faunaClient.query(Get(Ref(Collection("Issuer"), id))).get();
         return new Issuer(res.at("data", "name").to(String.class).get(),
                 res.at("data", "govId").to(String.class).get(),
-                res.at("data", "issuedVCs").collect(String.class).stream().toList(),
                 res.at("data", "publicDid").to(String.class).get(),
-                res.at("data", "privateDid").to(String.class).get());
+                res.at("data", "privateDid").to(String.class).get(),
+                res.at("data", "issuedVCs").collect(String.class).stream().toList(),
+                res.at("data", "pending_requests").collect(String.class).stream().toList());
     }
 
     @Override
@@ -68,10 +72,21 @@ public class IssuerServiceImpl implements IssuerService{
         Value res = faunaClient.query(Get(Match(Index("issuer_by_publicDid"), Value(did)))).get();
         return new Issuer(res.at("data", "name").to(String.class).get(),
                 res.at("data", "govId").to(String.class).get(),
-                res.at("data", "issuedVCs").collect(String.class).stream().toList(),
                 res.at("data", "publicDid").to(String.class).get(),
-                res.at("data", "privateDid").to(String.class).get());
+                res.at("data", "privateDid").to(String.class).get(),
+                res.at("data", "issuedVCs").collect(String.class).stream().toList(),
+                res.at("data", "pending_requests").collect(String.class).stream().toList());
     }
+
+
+//    @Override
+//    public void addPendingRequests(String userDetailsId) throws ExecutionException, InterruptedException {
+//
+//        Issuer issuer = getIssuerByPublicDid(userResponse.getIssuerDid());
+//        List<String> pendingVCs = new ArrayList<>();
+//        pendingVCs.addAll(issuer.getPending_requests());
+//        issuedVCs.add(vcId);
+//    }
 
     @Override
     public void updateIssuer(String did, String vcId) throws ExecutionException, InterruptedException {
@@ -80,6 +95,7 @@ public class IssuerServiceImpl implements IssuerService{
         List<String> issuedVCs = new ArrayList<>();
         issuedVCs.addAll(issuer.getIssuedVCs());
         issuedVCs.add(vcId);
+
         faunaClient.query(Update(
                 Ref(Collection("Issuer"), issuerId),
                 Obj(

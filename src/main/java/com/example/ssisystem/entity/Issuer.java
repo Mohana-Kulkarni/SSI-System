@@ -8,15 +8,10 @@ public class Issuer implements Serializable {
     String govId;
     private String privateDid;
     private String publicDid;
+    List<String> pending_requests;
     private List<String> issuedVCs;
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public Issuer() {
     }
@@ -26,12 +21,22 @@ public class Issuer implements Serializable {
         this.govId = govId;
     }
 
-    public Issuer(String name, String govId, List<String> issuedVCs, String publicDid, String privateDid) {
+    public Issuer(String name, String govId,String publicDid, String privateDid, List<String> issuedVCs, List<String> pending_requests) {
         this.name = name;
         this.govId = govId;
-        this.issuedVCs = issuedVCs;
         this.publicDid = publicDid;
         this.privateDid = privateDid;
+        this.issuedVCs = issuedVCs;
+        this.pending_requests = pending_requests;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPrivateDid() {
@@ -62,6 +67,13 @@ public class Issuer implements Serializable {
 
     public void setGovId(String govId) {
         this.govId = govId;
+    }
+    public List<String> getPending_requests() {
+        return pending_requests;
+    }
+
+    public void setPending_requests(List<String> pending_requests) {
+        this.pending_requests = pending_requests;
     }
 
 
