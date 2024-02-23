@@ -4,6 +4,7 @@ import java.util.Map;
 
 public class VerificationResult {
     private String result;
+    private String issuerDid;
     private Map<String, String> policy;
 
     public VerificationResult() {
@@ -37,5 +38,12 @@ public class VerificationResult {
     public void setPolicy(Map<String, String> policy) {
         this.policy = policy;
     }
+    public String getIssuerDid() {
+        return issuerDid;
+    }
+    public void setIssuerDid(String issuerDid) {
+        this.issuerDid = issuerDid;
+    }
+
 }
 
