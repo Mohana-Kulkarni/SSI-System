@@ -1,7 +1,6 @@
 package com.example.ssisystem.controller;
 
 import com.example.ssisystem.entity.UserDetails;
-import com.example.ssisystem.entity.UserResponse;
 import com.example.ssisystem.service.user.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

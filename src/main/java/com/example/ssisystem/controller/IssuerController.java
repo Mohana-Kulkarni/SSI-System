@@ -1,8 +1,6 @@
 package com.example.ssisystem.controller;
 
 import com.example.ssisystem.entity.Issuer;
-import com.example.ssisystem.entity.UserResponse;
-import com.example.ssisystem.entity.VerifiableCredentials;
 import com.example.ssisystem.service.issuer.IssuerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
