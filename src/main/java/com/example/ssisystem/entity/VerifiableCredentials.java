@@ -27,7 +27,7 @@ public class VerifiableCredentials {
             this.proof = proof;
         }
 
-        public String getId() {
+    public String getId() {
             return id;
         }
 

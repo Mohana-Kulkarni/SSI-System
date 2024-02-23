@@ -32,7 +32,7 @@ public class VCServiceImpl implements VCService{
         this.didServices = didServices;
     }
     @Override
-    public VerifiableCredentials issueCredentials(UserDetails userDetails, Issuer issuer, String proofType, List<String> proofPurpose, String privateDid) {
+    public VerifiableCredentials issueCredentials(UserDetails userDetails, Issuer issuer, String proofPurpose, String privateDid) {
         try {
             String id = UUID.randomUUID().toString();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a");
@@ -41,7 +41,7 @@ public class VCServiceImpl implements VCService{
             String validFrom = issuanceDate;
 
 
-            VerifiableCredentials  vc = new VerifiableCredentials(userDetails, issuer.getPublicDid(), proofType);
+            VerifiableCredentials  vc = new VerifiableCredentials(userDetails, issuer.getPublicDid(), "LD_Proof");
 
             vc.setId(id);
             vc.setExpirationDate(expirationDate);
@@ -111,7 +111,7 @@ public class VCServiceImpl implements VCService{
                 value.at("data", "proof", "verificationMethod").to(String.class).get(),
                 value.at("data", "proof", "jws").to(String.class).get(),
                 value.at("data", "proof", "created").to(String.class).get(),
-                value.at("data", "proof", "proofPurpose").collect(String.class).stream().toList()
+                value.at("data", "proof", "proofPurpose").to(String.class).get()
         );
         return new VerifiableCredentials(
                 value.at("data", "vcId").to(String.class).get(),
@@ -149,7 +149,7 @@ public class VCServiceImpl implements VCService{
                 value.at("data", "proof", "verificationMethod").to(String.class).get(),
                 value.at("data", "proof", "jws").to(String.class).get(),
                 value.at("data", "proof", "created").to(String.class).get(),
-                value.at("data", "proof", "proofPurpose").collect(String.class).stream().toList()
+                value.at("data", "proof", "proofPurpose").to(String.class).get()
         );
         return new VerifiableCredentials(
                 value.at("data", "vcId").to(String.class).get(),
