@@ -10,6 +10,15 @@ public class UserDetails  {
     private String placeOfBirth;
     private String proofId;
     private String docType;
+    private VerificationResult verificationResult;
+
+    public VerificationResult getVerificationResult() {
+        return verificationResult;
+    }
+
+    public void setVerificationResult(VerificationResult verificationResult) {
+        this.verificationResult = verificationResult;
+    }
 
     public UserDetails() {
     }

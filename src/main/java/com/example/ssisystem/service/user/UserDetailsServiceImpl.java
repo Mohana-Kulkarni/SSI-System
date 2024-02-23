@@ -1,7 +1,9 @@
 package com.example.ssisystem.service.user;
 
 import com.example.ssisystem.entity.UserDetails;
+import com.example.ssisystem.entity.UserResponse;
 import com.example.ssisystem.service.did.DIDService;
+import com.example.ssisystem.service.issuer.IssuerService;
 import com.faunadb.client.FaunaClient;
 import com.faunadb.client.types.Value;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static com.faunadb.client.query.Language.*;
@@ -52,4 +55,16 @@ public class UserDetailsServiceImpl implements UserDetailsService{
                 val.at("data", "docType").to(String.class).get()
         );
     }
+
+    @Override
+    public void updateUserDetails(String id, UserDetails userDetails) throws ExecutionException, InterruptedException {
+        faunaClient.query(Update
+                (Ref(Collection("UserDetails"), id),
+                        Obj(
+                                "data", Value(userDetails)
+                        )
+                )).get();
+
+    }
+
 }
