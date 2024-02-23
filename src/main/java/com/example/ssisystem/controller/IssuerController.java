@@ -30,9 +30,14 @@ public class IssuerController {
         return issuerService.getIssuerByPublicDid(did);
     }
 
+    @GetMapping("/request")
+    public void getVCRequest(@RequestParam("userId") String userId,@RequestParam("issuerDid") String issuerDid) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
+        issuerService.addPendingRequests(userId, issuerDid);
+    }
+
     @PostMapping("/issueVC")
-    public VerifiableCredentials issueVC(@RequestBody UserResponse userResponse) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
-        return issuerService.issueVC(userResponse.getUserDetails(), userResponse.getIssuerDid(), userResponse.getType(), userResponse.getPolicies());
+    public void issueVC(@RequestParam("userDetailsId") String userDetailsId, @RequestParam("id") String id) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
+        issuerService.issueVC(userDetailsId, id);
     }
     @PostMapping("/")
     public void addIssuer(@RequestBody Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
@@ -40,7 +45,7 @@ public class IssuerController {
     }
 
     @PutMapping("/update/did")
-    public void updateIssuer(@RequestParam("did") String did, @RequestParam("vcId") String vcId) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
-        issuerService.updateIssuer(did, vcId);
+    public void updateIssuer(@RequestParam("did") String did, @RequestBody Issuer issuer) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
+        issuerService.updateIssuer(did, issuer);
     }
 }
