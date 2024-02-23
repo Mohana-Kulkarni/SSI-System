@@ -1,6 +1,7 @@
 package com.example.ssisystem.controller;
 
 import com.example.ssisystem.entity.Issuer;
+import com.example.ssisystem.entity.Request;
 import com.example.ssisystem.service.issuer.IssuerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,14 +29,14 @@ public class IssuerController {
         return issuerService.getIssuerByPublicDid(did);
     }
 
-    @GetMapping("/request")
-    public void getVCRequest(@RequestParam("userId") String userId,@RequestParam("issuerDid") String issuerDid) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
-        issuerService.addPendingRequests(userId, issuerDid);
+    @PostMapping("/request")
+    public void getVCRequest(@RequestBody Request request) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
+        issuerService.addPendingRequests(request.getUserId(), request.getIssuerDid());
     }
 
     @PostMapping("/issueVC")
-    public void issueVC(@RequestParam("userDetailsId") String userDetailsId, @RequestParam("id") String id) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
-        issuerService.issueVC(userDetailsId, id);
+    public void issueVC(@RequestBody Request request) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
+        issuerService.issueVC(request.getUserId(), request.getIssuerDid());
     }
     @PostMapping("/")
     public void addIssuer(@RequestBody Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {

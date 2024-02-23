@@ -136,18 +136,30 @@ public class IssuerServiceImpl implements IssuerService{
         Issuer issuer = getIssuerByPublicDid(issuerDid);
         UserDetails userDetails = userDetailsService.getUserById(userDetailsId);
         VerificationResult result = verifyPolicy(userDetails, issuer.getType());
+        result.setIssuerDid(issuerDid);
+        List<VerificationResult> resultList = new ArrayList<>();
+        resultList.add(result);
         String vcId;
         boolean res;
         if (result.getResult().equals("fail")) {
             vcId = "";
             res = false;
-            userDetails.setVerificationResult(result);
+            userDetails.setVerificationResult(resultList);
         } else {
             VerifiableCredentials vc = vcService.issueCredentials(userDetails,issuer, issuer.getType(), issuer.getPrivateDid());
             vcId = vc.getId();
             res = true;
         }
-        userDetails.setVerificationResult(result);
+        userDetails.setVerificationResult(resultList);
+        List<String> issuedVCs;
+        if(userDetails.getIssuedVCs() == null) {
+            issuedVCs = new ArrayList<>();
+        } else {
+            issuedVCs = new ArrayList<>();
+            issuedVCs.addAll(userDetails.getIssuedVCs());
+        }
+        issuedVCs.add(vcId);
+        userDetails.setIssuedVCs(issuedVCs);
         userDetailsService.updateUserDetails(userDetailsId, userDetails);
         removePendingRequest(issuerDid, userDetailsId, vcId, res);
         System.out.println("VC generated successfully!!");
