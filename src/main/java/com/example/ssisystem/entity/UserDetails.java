@@ -1,5 +1,7 @@
 package com.example.ssisystem.entity;
 
+import java.util.List;
+
 public class UserDetails  {
     private String userDid;
     private String firstName;
@@ -10,13 +12,22 @@ public class UserDetails  {
     private String placeOfBirth;
     private String proofId;
     private String docType;
-    private VerificationResult verificationResult;
+    private List<VerificationResult> verificationResult;
+    private List<String> issuedVCs;
 
-    public VerificationResult getVerificationResult() {
+    public List<String> getIssuedVCs() {
+        return issuedVCs;
+    }
+
+    public void setIssuedVCs(List<String> issuedVCs) {
+        this.issuedVCs = issuedVCs;
+    }
+
+    public List<VerificationResult> getVerificationResult() {
         return verificationResult;
     }
 
-    public void setVerificationResult(VerificationResult verificationResult) {
+    public void setVerificationResult(List<VerificationResult> verificationResult) {
         this.verificationResult = verificationResult;
     }
 
