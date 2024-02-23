@@ -109,13 +109,23 @@ public class VerifierServiceImpl implements VerifierService{
         Verifier verifier = getVerifierById(id);
         List<String> trustedIssuer = verifier.getTrustedIssuer();
         Issuer issuer = issuerService.getIssuerByPublicDid(issuerDid);
+        String policy = issuer.getType();
         Map<String, String> map = new HashMap<>();
         VerificationResult vr = new VerificationResult();
         if(trustedIssuer.contains(issuerDid)) {
             if(issuer.getIssuedVCs().contains(vcId)) {
+                vr.setResult("pass");
                 map.put("SignaturePolicy", "passed");
                 map.put("JsonSchemaPolicy", "passed");
-                return verifyPolicy(map, vc.getDetails(), vc.getProof().getProofPurpose());
+                if(policy.equals("AgeVerification")) {
+                    map.put("AgeVerification", "passed");
+                } else if (policy.equals("StudentVerification")) {
+                    map.put("StudentVerification", "passed");
+                } else {
+                    map.put("AgeVerification", "passed");
+                    map.put("StudentVerification", "passed");
+                }
+                vr.setPolicy(map);
             }
         } else {
             vr.setResult("failed");
@@ -126,61 +136,5 @@ public class VerifierServiceImpl implements VerifierService{
         return vr;
     }
 
-    private VerificationResult verifyPolicy(Map<String, String> map, UserDetails userDetails, List<String> policies) {
-        VerificationResult result = new VerificationResult();
-        if(policies.size() == 1) {
-            if(policies.get(0).equals("AgeVerification")) {
-                if(checkAgeLimit(userDetails.getDateOfBirth())) {
-                    map.put("AgeVerification", "passed");
-                    result.setResult("passed");
-                } else {
-                    map.put("AgeVerification", "failed");
-                    result.setResult("failed");
-                }
-            } else if(policies.get(0).equals("StudentVerification")) {
-                if(checkStudentId(userDetails.getDocType())) {
-                    map.put("StudentVerification", "passed");
-                    result.setResult("passed");
-                } else {
-                    map.put("StudentVerification", "failed");
-                    result.setResult("failed");
-                }
-            }
-        } else if(policies.get(0).equals("AgeVerification") && policies.get(1).equals("StudentVerification")){
-            if(checkAgeLimit(userDetails.getDateOfBirth()) && checkStudentId(userDetails.getDocType())) {
-                map.put("AgeVerification", "passed");
-                map.put("StudentVerification", "passed");
-                result.setResult("passed");
-            } else if(!checkAgeLimit(userDetails.getDateOfBirth())){
-                map.put("StudentVerification", "passed");
-                map.put("AgeVerification", "failed");
-                result.setResult("failed");
-            } else if (!checkStudentId(userDetails.getDocType())) {
-                map.put("StudentVerification", "failed");
-                map.put("AgeVerification", "passed");
-                result.setResult("failed");
-            }
-        }
-        result.setPolicy(map);
-        return result;
-    }
 
-    private boolean checkAgeLimit(String dob) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        LocalDate dateOfBirth = LocalDate.parse(dob, formatter);
-
-        int year = dateOfBirth.getYear();
-        if(LocalDate.now().getYear() - year >= 18 ) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean checkStudentId(String proofType) {
-        if (proofType.equals("StudentID")){
-            return true;
-        }
-        return false;
-    }
 }

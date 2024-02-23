@@ -22,6 +22,10 @@ public class VerifierController {
     public Verifier getVerifierById(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
         return verifierService.getVerifierById(id);
     }
+    @GetMapping("/result")
+    public VerificationResult verifyVCs(@RequestParam("id") String id, @RequestParam("vcId") String vcId) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
+        return verifierService.verify_vc(id, vcId);
+    }
 
     @PostMapping("/")
     public void addVerifier(@RequestBody Verifier verifier) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
@@ -33,10 +37,7 @@ public class VerifierController {
         verifierService.addTrustedIssuers(id, did);
     }
 
-    @PostMapping("/result")
-    public VerificationResult verifyVCs(@RequestParam("id") String id, @RequestParam("vcId") String vcId) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
-        return verifierService.verify_vc(id, vcId);
-    }
+
     @PutMapping("/update")
     public void updateverifier(@RequestParam("id") String id, @RequestBody Verifier verifier) {
         verifierService.updateVerifier(id, verifier);
