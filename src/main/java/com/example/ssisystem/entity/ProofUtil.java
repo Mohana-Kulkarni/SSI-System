@@ -8,12 +8,12 @@ public class ProofUtil {
     private String verificationMethod;
     private String jws;
     private String created;
-    private List<String> proofPurpose;
+    private String proofPurpose;
 
     public ProofUtil() {
     }
 
-    public ProofUtil(String proofType, String verificationMethod, String jws, String created, List<String> proofPurpose) {
+    public ProofUtil(String proofType, String verificationMethod, String jws, String created,String proofPurpose) {
         this.proofType = proofType;
         this.verificationMethod = verificationMethod;
         this.jws = jws;
@@ -25,11 +25,11 @@ public class ProofUtil {
         return proofType;
     }
 
-    public List<String> getProofPurpose() {
+    public String getProofPurpose() {
         return proofPurpose;
     }
 
-    public void setProofPurpose(List<String> proofPurpose) {
+    public void setProofPurpose(String proofPurpose) {
         this.proofPurpose = proofPurpose;
     }
 
