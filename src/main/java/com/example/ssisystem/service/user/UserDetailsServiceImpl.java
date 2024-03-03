@@ -1,6 +1,7 @@
 package com.example.ssisystem.service.user;
 
 import com.example.ssisystem.entity.UserDetails;
+import com.example.ssisystem.entity.VerificationResult;
 import com.example.ssisystem.service.did.DIDService;
 import com.faunadb.client.FaunaClient;
 import com.faunadb.client.types.Value;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.faunadb.client.query.Language.*;
@@ -48,7 +50,8 @@ public class UserDetailsServiceImpl implements UserDetailsService{
                 val.at("data", "gender").to(String.class).get(),
                 val.at("data","placeOfBirth").to(String.class).get(),
                 val.at("data", "proofId").to(String.class).get(),
-                val.at("data", "docType").to(String.class).get()
+                val.at("data", "docType").to(String.class).get(),
+                val.at("data", "verificationResult").collect(VerificationResult.class).stream().toList()
         );
     }
 
