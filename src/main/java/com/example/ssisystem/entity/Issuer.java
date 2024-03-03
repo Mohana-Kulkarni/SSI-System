@@ -12,6 +12,7 @@ public class Issuer implements Serializable {
     private String type;
     List<String> pendingRequests;
     private List<String> issuedVCs;
+    List<String> rejectedRequests;
 
     public Issuer() {
     }
@@ -21,7 +22,7 @@ public class Issuer implements Serializable {
         this.govId = govId;
     }
 
-    public Issuer(String name, String govId, String type, String publicDid, String privateDid, List<String> issuedVCs, List<String> pendingRequests) {
+    public Issuer(String name, String govId, String type, String publicDid, String privateDid, List<String> issuedVCs, List<String> pendingRequests, List<String> rejectedRequests) {
         this.name = name;
         this.govId = govId;
         this.type = type;
@@ -29,6 +30,7 @@ public class Issuer implements Serializable {
         this.privateDid = privateDid;
         this.issuedVCs = issuedVCs;
         this.pendingRequests = pendingRequests;
+        this.rejectedRequests = rejectedRequests;
     }
 
 
@@ -83,6 +85,14 @@ public class Issuer implements Serializable {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public List<String> getRejectedRequests() {
+        return rejectedRequests;
+    }
+
+    public void setRejectedRequests(List<String> rejectedRequests) {
+        this.rejectedRequests = rejectedRequests;
     }
 
 }

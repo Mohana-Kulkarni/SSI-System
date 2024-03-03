@@ -70,7 +70,8 @@ public class IssuerServiceImpl implements IssuerService{
                 res.at("data", "publicDid").to(String.class).get(),
                 res.at("data", "privateDid").to(String.class).get(),
                 res.at("data", "issuedVCs").collect(String.class).stream().toList(),
-                res.at("data", "pendingRequests").collect(String.class).stream().toList());
+                res.at("data", "pendingRequests").collect(String.class).stream().toList(),
+                res.at("data", "rejectedRequests").collect(String.class).stream().toList());
     }
 
     @Override
@@ -82,13 +83,39 @@ public class IssuerServiceImpl implements IssuerService{
                 res.at("data", "publicDid").to(String.class).get(),
                 res.at("data", "privateDid").to(String.class).get(),
                 res.at("data", "issuedVCs").collect(String.class).stream().toList(),
-                res.at("data", "pendingRequests").collect(String.class).stream().toList());
+                res.at("data", "pendingRequests").collect(String.class).stream().toList(),
+                res.at("data", "rejectedRequests").collect(String.class).stream().toList());
     }
 
 
     @Override
     public void addPendingRequests(String userDetailsId, String issuerDid) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         Issuer issuer = getIssuerByPublicDid(issuerDid);
+        List<String> rejectedRequests;
+        if(issuer.getRejectedRequests() == null) {
+            rejectedRequests = new ArrayList<>();
+        } else {
+            rejectedRequests = new ArrayList<>();
+            rejectedRequests.addAll(issuer.getRejectedRequests());
+        }
+
+        if(rejectedRequests.contains(userDetailsId)) {
+            rejectedRequests.remove(userDetailsId);
+            UserDetails details = userDetailsService.getUserById(userDetailsId);
+            List<VerificationResult> resultList = new ArrayList<>();
+            if(details.getVerificationResult() != null) {
+                resultList.addAll(details.getVerificationResult());
+            }
+            for (VerificationResult result : details.getVerificationResult()) {
+                if(result.getIssuerDid().equals(issuerDid)) {
+                    resultList.remove(result);
+                }
+            }
+            details.setVerificationResult(resultList);
+            userDetailsService.updateUserDetails(userDetailsId, details);
+            issuer.setRejectedRequests(rejectedRequests);
+        }
+
         List<String> pendingRequests = new ArrayList<>();
         for (String id: issuer.getPendingRequests()) {
             pendingRequests.add(id);
@@ -122,6 +149,7 @@ public class IssuerServiceImpl implements IssuerService{
         map.put("privateDid", issuer.getPrivateDid());
         map.put("publicDid", issuer.getPublicDid());
         map.put("pendingRequests", issuer.getPendingRequests());
+        map.put("rejectedRequests", issuer.getRejectedRequests());
         map.put("issuedVCs", issuer.getIssuedVCs());
         faunaClient.query(Update(
                 Ref(Collection("Issuer"), issuerId),
@@ -137,20 +165,23 @@ public class IssuerServiceImpl implements IssuerService{
         UserDetails userDetails = userDetailsService.getUserById(userDetailsId);
         VerificationResult result = verifyPolicy(userDetails, issuer.getType());
         result.setIssuerDid(issuerDid);
-        List<VerificationResult> resultList = new ArrayList<>();
-        resultList.add(result);
         String vcId;
         boolean res;
         if (result.getResult().equals("fail")) {
             vcId = "";
             res = false;
+            List<VerificationResult> resultList = new ArrayList<>();
+            resultList.addAll(userDetails.getVerificationResult());
+            resultList.add(result);
             userDetails.setVerificationResult(resultList);
+            userDetailsService.updateUserDetails(userDetailsId, userDetails);
+            System.out.println("Problem in generating VC !!");
+
         } else {
             VerifiableCredentials vc = vcService.issueCredentials(userDetails,issuer, issuer.getType(), issuer.getPrivateDid());
             vcId = vc.getId();
             res = true;
         }
-        userDetails.setVerificationResult(resultList);
         List<String> issuedVCs;
         if(userDetails.getIssuedVCs() == null) {
             issuedVCs = new ArrayList<>();
@@ -160,7 +191,6 @@ public class IssuerServiceImpl implements IssuerService{
         }
         issuedVCs.add(vcId);
         userDetails.setIssuedVCs(issuedVCs);
-        userDetailsService.updateUserDetails(userDetailsId, userDetails);
         removePendingRequest(issuerDid, userDetailsId, vcId, res);
         System.out.println("VC generated successfully!!");
     }
