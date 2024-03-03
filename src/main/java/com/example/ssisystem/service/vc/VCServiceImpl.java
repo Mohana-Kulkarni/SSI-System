@@ -1,21 +1,20 @@
 package com.example.ssisystem.service.vc;
 
-import com.example.ssisystem.entity.Issuer;
-import com.example.ssisystem.entity.ProofUtil;
-import com.example.ssisystem.entity.UserDetails;
-import com.example.ssisystem.entity.VerifiableCredentials;
+import com.example.ssisystem.entity.*;
 import com.example.ssisystem.service.did.DIDService;
 import com.faunadb.client.FaunaClient;
 import com.faunadb.client.types.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.security.PrivateKey;
 import java.security.Signature;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static com.faunadb.client.query.Language.*;
@@ -66,18 +65,20 @@ public class VCServiceImpl implements VCService{
 
             vc.setProof(proof);
 
+            Map<String, Object> map = new HashMap<>();
+            map.put("vcId", vc.getId());
+            map.put("issuer", vc.getIssuerDid());
+            map.put("subject", vc.getDetails());
+            map.put("expirationDate", expirationDate);
+            map.put("proof", vc.getProof());
+            map.put("status", "active");
+
 
             faunaClient.query(
                     Create(
                             Collection("Verifiable_Credentials"),
                             Obj(
-                                    "data", Obj(
-                                            "vcId", Value(vc.getId()),
-                                            "issuer", Value(vc.getIssuerDid()),
-                                            "subject", Value(vc.getDetails()),
-                                            "expirationDate", Value(vc.getExpirationDate()),
-                                            "proof", Value(vc.getProof())
-                                    )
+                                    "data", Value(map)
                             )
                     )
             );
@@ -104,7 +105,8 @@ public class VCServiceImpl implements VCService{
                 value.at("data", "subject", "gender").to(String.class).get(),
                 value.at("data", "subject", "placeOfBirth").to(String.class).get(),
                 value.at("data", "subject", "proofId").to(String.class).get(),
-                value.at("data", "subject", "docType").to(String.class).get()
+                value.at("data", "subject", "docType").to(String.class).get(),
+                value.at("data", "verificationResult").collect(VerificationResult.class).stream().toList()
         );
         ProofUtil proof = new ProofUtil(
                 value.at("data", "proof", "proofType").to(String.class).get(),
@@ -142,7 +144,8 @@ public class VCServiceImpl implements VCService{
                 value.at("data", "subject", "gender").to(String.class).get(),
                 value.at("data", "subject", "placeOfBirth").to(String.class).get(),
                 value.at("data", "subject", "proofId").to(String.class).get(),
-                value.at("data", "subject", "docType").to(String.class).get()
+                value.at("data", "subject", "docType").to(String.class).get(),
+                value.at("data", "verificationResult").collect(VerificationResult.class).stream().toList()
         );
         ProofUtil proof = new ProofUtil(
                 value.at("data", "proof", "proofType").to(String.class).get(),
@@ -161,5 +164,37 @@ public class VCServiceImpl implements VCService{
                 issuanceStr,
                 proof
         );
+    }
+
+    @Override
+    public void deleteVCs() throws ExecutionException, InterruptedException {
+//        CompletableFuture<Value> result = faunaClient.query(
+//                Paginate(Documents(Collection("Verifiable_Credentials")))
+//        );
+//        Value value = result.join();
+//        List<Value> res = value.at("data").collect(Value.class).stream().toList();
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        LocalDateTime now = LocalDateTime.now();
+//        for(Value val : res) {
+//            VerifiableCredentials vc = getVCById(val.get(Value.RefV.class).getId());
+//            String issuanceDate = vc.getIssuanceDate();
+//            LocalDateTime date = LocalDateTime.parse(issuanceDate, formatter);
+//            if()
+//        }
+        Instant monthAgo = Instant.now().minus(Duration.ofDays(1));
+        CompletableFuture<Value> result = faunaClient.query(
+                        Paginate(Match(Collection("Verifiable_Credentials")))
+                );
+        Value value = result.join();
+        List<Value> res = value.at("data").collect(Value.class).stream().toList();
+        for(Value val : res) {
+            Instant creationTimeStamp = Instant.parse(val.at("ts").to(String.class).get());
+            if(creationTimeStamp.isBefore(monthAgo)){
+                faunaClient.query(
+                        Delete(Ref(Collection("Verifiable_Credentials"), Value(val.at("ref"))))
+                );
+            }
+        }
+
     }
 }

@@ -9,8 +9,9 @@ public class VerifiableCredentials {
         private String expirationDate;
         private String validFrom;
         private ProofUtil proof;
+        private String status;
 
-        public VerifiableCredentials(UserDetails details, String issuerDid, String type) {
+    public VerifiableCredentials(UserDetails details, String issuerDid, String type) {
             this.details = details;
             this.issuerDid = issuerDid;
             this.type = type;
@@ -89,6 +90,15 @@ public class VerifiableCredentials {
 
         public void setProof(ProofUtil proof) {
             this.proof = proof;
+        }
+
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
         }
 
         @Override
