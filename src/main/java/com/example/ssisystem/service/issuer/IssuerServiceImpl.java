@@ -66,7 +66,7 @@ public class IssuerServiceImpl implements IssuerService{
 
         return new Issuer(res.at("data", "name").to(String.class).get(),
                 res.at("data", "govId").to(String.class).get(),
-                res.at("data", "type").to(String.class).get(),
+                res.at("data", "type").to(IssuerType.class).get(),
                 res.at("data", "publicDid").to(String.class).get(),
                 res.at("data", "privateDid").to(String.class).get(),
                 res.at("data", "issuedVCs").collect(String.class).stream().toList(),
@@ -79,7 +79,7 @@ public class IssuerServiceImpl implements IssuerService{
         Value res = faunaClient.query(Get(Match(Index("issuer_by_publicDid"), Value(did)))).get();
         return new Issuer(res.at("data", "name").to(String.class).get(),
                 res.at("data", "govId").to(String.class).get(),
-                res.at("data", "type").to(String.class).get(),
+                res.at("data", "type").to(IssuerType.class).get(),
                 res.at("data", "publicDid").to(String.class).get(),
                 res.at("data", "privateDid").to(String.class).get(),
                 res.at("data", "issuedVCs").collect(String.class).stream().toList(),
@@ -163,7 +163,7 @@ public class IssuerServiceImpl implements IssuerService{
     public void issueVC(String userDetailsId, String issuerDid) throws ExecutionException, InterruptedException {
         Issuer issuer = getIssuerByPublicDid(issuerDid);
         UserDetails userDetails = userDetailsService.getUserById(userDetailsId);
-        VerificationResult result = verifyPolicy(userDetails, issuer.getType());
+        VerificationResult result = verifyPolicy(userDetails, String.valueOf(issuer.getType()));
         result.setIssuerDid(issuerDid);
         String vcId;
         boolean res;
@@ -175,10 +175,14 @@ public class IssuerServiceImpl implements IssuerService{
             resultList.add(result);
             userDetails.setVerificationResult(resultList);
             userDetailsService.updateUserDetails(userDetailsId, userDetails);
+            List<String> rejectedRequests = new ArrayList<>();
+            rejectedRequests.addAll(issuer.getRejectedRequests());
+            rejectedRequests.add(userDetailsId);
+            issuer.setRejectedRequests(rejectedRequests);
             System.out.println("Problem in generating VC !!");
 
         } else {
-            VerifiableCredentials vc = vcService.issueCredentials(userDetails,issuer, issuer.getType(), issuer.getPrivateDid());
+            VerifiableCredentials vc = vcService.issueCredentials(userDetails,issuer, String.valueOf(issuer.getType()), issuer.getPrivateDid());
             vcId = vc.getId();
             res = true;
         }
@@ -193,6 +197,30 @@ public class IssuerServiceImpl implements IssuerService{
         userDetails.setIssuedVCs(issuedVCs);
         removePendingRequest(issuerDid, userDetailsId, vcId, res);
         System.out.println("VC generated successfully!!");
+    }
+
+    @Override
+    public void rejectRequest(String userDetailsId, String issuerDid) throws ExecutionException, InterruptedException {
+        Issuer issuer = getIssuerByPublicDid(issuerDid);
+        List<String> pendingRequests = new ArrayList<>();
+        pendingRequests.addAll(issuer.getPendingRequests());
+        pendingRequests.remove(userDetailsId);
+        issuer.setPendingRequests(pendingRequests);
+        List<String> rejectedRequests = new ArrayList<>();
+        rejectedRequests.addAll(issuer.getRejectedRequests());
+        rejectedRequests.add(userDetailsId);
+        UserDetails details = userDetailsService.getUserById(userDetailsId);
+        VerificationResult result = new VerificationResult();
+        result.setResult("fail");
+        Map<String, String> map = new HashMap<>();
+        map.put("Document Verification", "failed");
+        result.setPolicy(map);
+        List<VerificationResult> resultList = new ArrayList<>();
+        resultList.addAll(details.getVerificationResult());
+        resultList.add(result);
+        details.setVerificationResult(resultList);
+        userDetailsService.updateUserDetails(userDetailsId, details);
+        updateIssuer(issuerDid, issuer);
     }
 
 

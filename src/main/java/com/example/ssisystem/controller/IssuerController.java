@@ -47,4 +47,9 @@ public class IssuerController {
     public void updateIssuer(@RequestParam("did") String did, @RequestBody Issuer issuer) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
         issuerService.updateIssuer(did, issuer);
     }
+
+    @PutMapping("/reject/")
+    public void rejectRequest(@RequestBody Request request) throws ExecutionException, InterruptedException {
+        issuerService.rejectRequest(request.getUserId(), request.getIssuerDid());
+    }
 }

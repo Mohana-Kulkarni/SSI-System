@@ -17,4 +17,6 @@ public interface IssuerService {
     void updateIssuer(String did, Issuer issuer) throws ExecutionException, InterruptedException;
     void issueVC(String userDetailsId, String issuerDid) throws ExecutionException, InterruptedException;
 
+    void rejectRequest(String userDetailsId, String issuerDid) throws ExecutionException, InterruptedException;
+
 }
