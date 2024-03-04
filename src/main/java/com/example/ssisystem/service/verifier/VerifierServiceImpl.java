@@ -109,7 +109,7 @@ public class VerifierServiceImpl implements VerifierService{
         Verifier verifier = getVerifierById(id);
         List<String> trustedIssuer = verifier.getTrustedIssuer();
         Issuer issuer = issuerService.getIssuerByPublicDid(issuerDid);
-        String policy = issuer.getType();
+        String policy = String.valueOf(issuer.getType());
         Map<String, String> map = new HashMap<>();
         VerificationResult vr = new VerificationResult();
         if(trustedIssuer.contains(issuerDid)) {
