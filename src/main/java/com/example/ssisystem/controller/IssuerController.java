@@ -48,7 +48,7 @@ public class IssuerController {
         issuerService.updateIssuer(did, issuer);
     }
 
-    @PutMapping("/reject/")
+    @PutMapping("/reject")
     public void rejectRequest(@RequestBody Request request) throws ExecutionException, InterruptedException {
         issuerService.rejectRequest(request.getUserId(), request.getIssuerDid());
     }

@@ -63,10 +63,12 @@ public class IssuerServiceImpl implements IssuerService{
     @Override
     public Issuer getIssuerById(String id) throws ExecutionException, InterruptedException {
         Value res = faunaClient.query(Get(Ref(Collection("Issuer"), id))).get();
+        String issuerType = res.at("data", "type").to(String.class).get();
+//        IssuerType type = IssuerType.valueOf(issuerType);
 
         return new Issuer(res.at("data", "name").to(String.class).get(),
                 res.at("data", "govId").to(String.class).get(),
-                res.at("data", "type").to(IssuerType.class).get(),
+                issuerType,
                 res.at("data", "publicDid").to(String.class).get(),
                 res.at("data", "privateDid").to(String.class).get(),
                 res.at("data", "issuedVCs").collect(String.class).stream().toList(),
@@ -77,9 +79,11 @@ public class IssuerServiceImpl implements IssuerService{
     @Override
     public Issuer getIssuerByPublicDid(String did) throws ExecutionException, InterruptedException {
         Value res = faunaClient.query(Get(Match(Index("issuer_by_publicDid"), Value(did)))).get();
+        String issuerType = res.at("data", "type").to(String.class).get();
+//        IssuerType type = IssuerType.valueOf(issuerType);
         return new Issuer(res.at("data", "name").to(String.class).get(),
                 res.at("data", "govId").to(String.class).get(),
-                res.at("data", "type").to(IssuerType.class).get(),
+                issuerType,
                 res.at("data", "publicDid").to(String.class).get(),
                 res.at("data", "privateDid").to(String.class).get(),
                 res.at("data", "issuedVCs").collect(String.class).stream().toList(),
@@ -195,6 +199,7 @@ public class IssuerServiceImpl implements IssuerService{
         }
         issuedVCs.add(vcId);
         userDetails.setIssuedVCs(issuedVCs);
+        userDetailsService.updateUserDetails(userDetailsId, userDetails);
         removePendingRequest(issuerDid, userDetailsId, vcId, res);
         System.out.println("VC generated successfully!!");
     }
@@ -209,9 +214,11 @@ public class IssuerServiceImpl implements IssuerService{
         List<String> rejectedRequests = new ArrayList<>();
         rejectedRequests.addAll(issuer.getRejectedRequests());
         rejectedRequests.add(userDetailsId);
+        issuer.setRejectedRequests(rejectedRequests);
         UserDetails details = userDetailsService.getUserById(userDetailsId);
         VerificationResult result = new VerificationResult();
         result.setResult("fail");
+        result.setIssuerDid(issuerDid);
         Map<String, String> map = new HashMap<>();
         map.put("Document Verification", "failed");
         result.setPolicy(map);
