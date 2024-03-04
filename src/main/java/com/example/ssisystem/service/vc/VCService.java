@@ -11,6 +11,6 @@ public interface VCService {
     VerifiableCredentials issueCredentials(UserDetails userDetails, Issuer issuer, String proofPurpose, String privateDid);
     VerifiableCredentials getVCById(String id) throws ExecutionException, InterruptedException;
     VerifiableCredentials getVcByVCId(String vcId) throws ExecutionException, InterruptedException;
-    void deleteVCs() throws ExecutionException, InterruptedException;
+    void updateVCStatus() throws ExecutionException, InterruptedException;
 
 }

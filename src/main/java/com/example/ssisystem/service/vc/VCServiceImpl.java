@@ -106,7 +106,8 @@ public class VCServiceImpl implements VCService{
                 value.at("data", "subject", "placeOfBirth").to(String.class).get(),
                 value.at("data", "subject", "proofId").to(String.class).get(),
                 value.at("data", "subject", "docType").to(String.class).get(),
-                value.at("data", "verificationResult").collect(VerificationResult.class).stream().toList()
+                value.at("data", "verificationResult").collect(VerificationResult.class).stream().toList(),
+                value.at("data", "issuedVCs").collect(String.class).stream().toList()
         );
         ProofUtil proof = new ProofUtil(
                 value.at("data", "proof", "proofType").to(String.class).get(),
@@ -145,7 +146,8 @@ public class VCServiceImpl implements VCService{
                 value.at("data", "subject", "placeOfBirth").to(String.class).get(),
                 value.at("data", "subject", "proofId").to(String.class).get(),
                 value.at("data", "subject", "docType").to(String.class).get(),
-                value.at("data", "verificationResult").collect(VerificationResult.class).stream().toList()
+                value.at("data", "verificationResult").collect(VerificationResult.class).stream().toList(),
+                value.at("data", "issuedVCs").collect(String.class).stream().toList()
         );
         ProofUtil proof = new ProofUtil(
                 value.at("data", "proof", "proofType").to(String.class).get(),
@@ -167,7 +169,8 @@ public class VCServiceImpl implements VCService{
     }
 
     @Override
-    public void deleteVCs() throws ExecutionException, InterruptedException {
+    @Scheduled(cron = "0 0 0 * * *")
+    public void updateVCStatus() throws ExecutionException, InterruptedException {
 //        CompletableFuture<Value> result = faunaClient.query(
 //                Paginate(Documents(Collection("Verifiable_Credentials")))
 //        );
@@ -181,20 +184,27 @@ public class VCServiceImpl implements VCService{
 //            LocalDateTime date = LocalDateTime.parse(issuanceDate, formatter);
 //            if()
 //        }
-        Instant monthAgo = Instant.now().minus(Duration.ofDays(1));
         CompletableFuture<Value> result = faunaClient.query(
-                        Paginate(Match(Collection("Verifiable_Credentials")))
-                );
+                Paginate(Documents(Collection("Verifiable_Credentials")))
+        );
         Value value = result.join();
         List<Value> res = value.at("data").collect(Value.class).stream().toList();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime now = LocalDateTime.now();
         for(Value val : res) {
-            Instant creationTimeStamp = Instant.parse(val.at("ts").to(String.class).get());
-            if(creationTimeStamp.isBefore(monthAgo)){
-                faunaClient.query(
-                        Delete(Ref(Collection("Verifiable_Credentials"), Value(val.at("ref"))))
-                );
+            String id = val.get(Value.RefV.class).getId();
+            VerifiableCredentials vc = getVCById(id);
+            String expirationDate = vc.getExpirationDate();
+            LocalDateTime date = LocalDateTime.parse(expirationDate, formatter);
+            if(now.isAfter(date)) {
+                vc.setStatus("expired");
+                faunaClient.query(Update(
+                        Ref(Collection("Verifiable_Credentials"), id),
+                        Obj(
+                                "data", Value(vc)
+                        )
+                ));
             }
         }
-
     }
 }
