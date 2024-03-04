@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -27,11 +29,23 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     @Override
     public String addUserDetails(UserDetails userDetails) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         userDetails.setUserDid(didService.generatePublicDid());
+        Map<String, Object> map = new HashMap<>();
+        map.put("firstName", userDetails.getFirstName());
+        map.put("lastName", userDetails.getLastName());
+        map.put("address", userDetails.getAddress());
+        map.put("userDid", userDetails.getUserDid());
+        map.put("dateOfBirth", userDetails.getDateOfBirth());
+        map.put("placeOfBirth", userDetails.getPlaceOfBirth());
+        map.put("proofId", userDetails.getProofId());
+        map.put("gender", userDetails.getGender());
+        map.put("docType", userDetails.getDocType());
+        map.put("verificationResult", new ArrayList<VerificationResult>());
+        map.put("issuedVCs", new ArrayList<>());
         Value val = faunaClient.query(
                 Create(
                         Collection("UserDetails"),
                         Obj(
-                                "data", Value(userDetails)
+                                "data", Value(map)
                         )
                 )
         ).get();
@@ -51,7 +65,8 @@ public class UserDetailsServiceImpl implements UserDetailsService{
                 val.at("data","placeOfBirth").to(String.class).get(),
                 val.at("data", "proofId").to(String.class).get(),
                 val.at("data", "docType").to(String.class).get(),
-                val.at("data", "verificationResult").collect(VerificationResult.class).stream().toList()
+                val.at("data", "verificationResult").collect(VerificationResult.class).stream().toList(),
+                val.at("data", "issuedVCs").collect(String.class).stream().toList()
         );
     }
 

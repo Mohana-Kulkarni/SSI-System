@@ -36,18 +36,18 @@ public class UserDetails  {
 
 
 
-    public UserDetails(String firstName, String lastName, String address, String dateOfBirth, String gender, String placeOfBirth, String proofId, String docType) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.address = address;
-        this.dateOfBirth = dateOfBirth;
-        this.gender = gender;
-        this.placeOfBirth = placeOfBirth;
-        this.proofId = proofId;
-        this.docType = docType;
-    }
+//    public UserDetails(String firstName, String lastName, String address, String dateOfBirth, String gender, String placeOfBirth, String proofId, String docType) {
+//        this.firstName = firstName;
+//        this.lastName = lastName;
+//        this.address = address;
+//        this.dateOfBirth = dateOfBirth;
+//        this.gender = gender;
+//        this.placeOfBirth = placeOfBirth;
+//        this.proofId = proofId;
+//        this.docType = docType;
+//    }
 
-    public UserDetails(String userDid, String firstName, String lastName, String address, String dateOfBirth, String gender, String placeOfBirth, String proofId, String docType, List<VerificationResult> verificationResult) {
+    public UserDetails(String userDid, String firstName, String lastName, String address, String dateOfBirth, String gender, String placeOfBirth, String proofId, String docType, List<VerificationResult> verificationResult, List<String> issuedVCs) {
         this.userDid = userDid;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -58,6 +58,7 @@ public class UserDetails  {
         this.proofId = proofId;
         this.docType = docType;
         this.verificationResult = verificationResult;
+        this.issuedVCs = issuedVCs;
     }
 
     public String getUserDid() {
