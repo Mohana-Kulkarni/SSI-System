@@ -171,19 +171,7 @@ public class VCServiceImpl implements VCService{
     @Override
     @Scheduled(cron = "0 0 0 * * *")
     public void updateVCStatus() throws ExecutionException, InterruptedException {
-//        CompletableFuture<Value> result = faunaClient.query(
-//                Paginate(Documents(Collection("Verifiable_Credentials")))
-//        );
-//        Value value = result.join();
-//        List<Value> res = value.at("data").collect(Value.class).stream().toList();
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//        LocalDateTime now = LocalDateTime.now();
-//        for(Value val : res) {
-//            VerifiableCredentials vc = getVCById(val.get(Value.RefV.class).getId());
-//            String issuanceDate = vc.getIssuanceDate();
-//            LocalDateTime date = LocalDateTime.parse(issuanceDate, formatter);
-//            if()
-//        }
+
         CompletableFuture<Value> result = faunaClient.query(
                 Paginate(Documents(Collection("Verifiable_Credentials")))
         );
