@@ -113,6 +113,7 @@ public class VerifierServiceImpl implements VerifierService{
         Map<String, String> map = new HashMap<>();
         VerificationResult vr = new VerificationResult();
         if(trustedIssuer.contains(issuerDid)) {
+            vr.setIssuerDid(issuerDid);
             if(issuer.getIssuedVCs().contains(vcId)) {
                 vr.setResult("pass");
                 map.put("SignaturePolicy", "passed");
