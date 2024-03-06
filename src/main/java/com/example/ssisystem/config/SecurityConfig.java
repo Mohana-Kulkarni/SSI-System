@@ -17,6 +17,7 @@ public class SecurityConfig {
                         .requestMatchers("/verifiers/**").permitAll()
                         .requestMatchers("/did/**").permitAll()
                         .requestMatchers("/userDetails/**").permitAll()
+                        .requestMatchers("/vcs/**").permitAll()
                         .requestMatchers("/swagger-ui/**",
                                 "/swagger-resources/**",
                                 "/v3/api-docs/**").permitAll()
