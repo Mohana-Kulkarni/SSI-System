@@ -93,9 +93,12 @@ public class VCServiceImpl implements VCService{
         Value value = faunaClient.query(Get(Ref(Collection("Verifiable_Credentials"), id))).get();
         String expirationDate = value.at("data", "expirationDate").to(String.class).get();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDateTime expiration = LocalDateTime.parse(expirationDate, formatter);
         LocalDateTime issuanceDate = expiration.minusDays(30);
-        String issuanceStr = issuanceDate.format(formatter);
+        String issuanceStr = issuanceDate.format(dateFormatter);
+
+
 //        List<String> issuedVCs = new ArrayList<>();
 //        if(value.at("data", "issuedVCs") != null) {
 //            issuedVCs.addAll(value.at("data", "issuedVCs").collect(String.class));
