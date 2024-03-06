@@ -96,6 +96,10 @@ public class VCServiceImpl implements VCService{
         LocalDateTime expiration = LocalDateTime.parse(expirationDate, formatter);
         LocalDateTime issuanceDate = expiration.minusDays(30);
         String issuanceStr = issuanceDate.format(formatter);
+//        List<String> issuedVCs = new ArrayList<>();
+//        if(value.at("data", "issuedVCs") != null) {
+//            issuedVCs.addAll(value.at("data", "issuedVCs").collect(String.class));
+//        }
         UserDetails userDetails = new UserDetails(
                 value.at("data", "subject", "userDid").to(String.class).get(),
                 value.at("data", "subject", "firstName").to(String.class).get(),
@@ -106,9 +110,10 @@ public class VCServiceImpl implements VCService{
                 value.at("data", "subject", "placeOfBirth").to(String.class).get(),
                 value.at("data", "subject", "proofId").to(String.class).get(),
                 value.at("data", "subject", "docType").to(String.class).get(),
-                value.at("data", "verificationResult").collect(VerificationResult.class).stream().toList(),
-                value.at("data", "issuedVCs").collect(String.class).stream().toList()
+                value.at("data", "subject", "verificationResult").collect(VerificationResult.class).stream().toList(),
+                value.at("data", "subject", "issuedVCs").collect(String.class).stream().toList()
         );
+
         ProofUtil proof = new ProofUtil(
                 value.at("data", "proof", "proofType").to(String.class).get(),
                 value.at("data", "proof", "verificationMethod").to(String.class).get(),
@@ -131,42 +136,10 @@ public class VCServiceImpl implements VCService{
     @Override
     public VerifiableCredentials getVcByVCId(String vcId) throws ExecutionException, InterruptedException {
         Value value = faunaClient.query(Get(Match(Index("verifiable_credentials_by_vcId"), Value(vcId)))).get();
-        String expirationDate = value.at("data", "expirationDate").to(String.class).get();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a");
-        LocalDateTime expiration = LocalDateTime.parse(expirationDate, formatter);
-        LocalDateTime issuanceDate = expiration.minusDays(30);
-        String issuanceStr = issuanceDate.format(formatter);
-        UserDetails userDetails = new UserDetails(
-                value.at("data", "subject", "userDid").to(String.class).get(),
-                value.at("data", "subject", "firstName").to(String.class).get(),
-                value.at("data", "subject", "lastName").to(String.class).get(),
-                value.at("data", "subject", "address").to(String.class).get(),
-                value.at("data", "subject", "dateOfBirth").to(String.class).get(),
-                value.at("data", "subject", "gender").to(String.class).get(),
-                value.at("data", "subject", "placeOfBirth").to(String.class).get(),
-                value.at("data", "subject", "proofId").to(String.class).get(),
-                value.at("data", "subject", "docType").to(String.class).get(),
-                value.at("data", "verificationResult").collect(VerificationResult.class).stream().toList(),
-                value.at("data", "issuedVCs").collect(String.class).stream().toList()
-        );
-        ProofUtil proof = new ProofUtil(
-                value.at("data", "proof", "proofType").to(String.class).get(),
-                value.at("data", "proof", "verificationMethod").to(String.class).get(),
-                value.at("data", "proof", "jws").to(String.class).get(),
-                value.at("data", "proof", "created").to(String.class).get(),
-                value.at("data", "proof", "proofPurpose").to(String.class).get()
-        );
-        return new VerifiableCredentials(
-                value.at("data", "vcId").to(String.class).get(),
-                userDetails,
-                value.at("data", "issuer").to(String.class).get(),
-                "LD_Proof",
-                issuanceStr,
-                expirationDate,
-                issuanceStr,
-                proof
-        );
+        String id = value.at("ref").get(Value.RefV.class).getId();
+        return getVCById(id);
     }
+
 
     @Override
     @Scheduled(cron = "0 0 0 * * *")
