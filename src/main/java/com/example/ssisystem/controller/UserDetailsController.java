@@ -23,7 +23,7 @@ public class UserDetailsController {
     }
 
     @PostMapping("/")
-    public void addUserDetails(@RequestBody UserDetails userDetails) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
-        userDetailsService.addUserDetails(userDetails);
+    public String addUserDetails(@RequestBody UserDetails userDetails) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
+        return userDetailsService.addUserDetails(userDetails);
     }
 }
