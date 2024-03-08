@@ -26,4 +26,8 @@ public class UserDetailsController {
     public String addUserDetails(@RequestBody UserDetails userDetails) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
         return userDetailsService.addUserDetails(userDetails);
     }
+    @PutMapping("/update/id")
+    public void updateUserDetails(@RequestParam("id") String id, @RequestBody UserDetails userDetails) throws ExecutionException, InterruptedException {
+        userDetailsService.updateUserDetails(id, userDetails);
+    }
 }
