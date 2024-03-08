@@ -3,6 +3,7 @@ package com.example.ssisystem.service.verifier;
 import com.example.ssisystem.entity.UserDetails;
 import com.example.ssisystem.entity.VerificationResult;
 import com.example.ssisystem.entity.Verifier;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -16,6 +17,6 @@ public interface VerifierService {
     void addTrustedIssuers(String id, String issuerDid) throws ExecutionException, InterruptedException;
     Verifier getVerifierById(String id) throws ExecutionException, InterruptedException;
     void updateVerifier(String id, Verifier verifier);
-    VerificationResult verify_vc(String id, String vcId) throws ExecutionException, InterruptedException;
+    VerificationResult verify_vc(String id, String vcId, String ticketId, String nftId) throws ExecutionException, InterruptedException, JsonProcessingException;
 
 }

@@ -3,6 +3,7 @@ package com.example.ssisystem.controller;
 import com.example.ssisystem.entity.VerificationResult;
 import com.example.ssisystem.entity.Verifier;
 import com.example.ssisystem.service.verifier.VerifierService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +24,8 @@ public class VerifierController {
         return verifierService.getVerifierById(id);
     }
     @GetMapping("/result")
-    public VerificationResult verifyVCs(@RequestParam("id") String id, @RequestParam("vcId") String vcId) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
-        return verifierService.verify_vc(id, vcId);
+    public VerificationResult verifyVCs(@RequestParam("id") String id, @RequestParam("vcId") String vcId, @RequestParam("ticketId") String ticketId, @RequestParam("nftId") String nftId) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, JsonProcessingException {
+        return verifierService.verify_vc(id, vcId, ticketId, nftId);
     }
 
     @PostMapping("/")

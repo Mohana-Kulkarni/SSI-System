@@ -4,9 +4,16 @@ import com.example.ssisystem.entity.*;
 import com.example.ssisystem.service.did.DIDService;
 import com.example.ssisystem.service.issuer.IssuerService;
 import com.example.ssisystem.service.vc.VCService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.faunadb.client.FaunaClient;
 import com.faunadb.client.types.Value;
+import okhttp3.Response;
+import org.springframework.http.*;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -28,12 +35,14 @@ public class VerifierServiceImpl implements VerifierService{
     private DIDService didServices;
     private IssuerService issuerService;
     private VCService vcService;
+    private RestTemplate restTemplate;
 
-    public VerifierServiceImpl(FaunaClient faunaClient, DIDService didServices,IssuerService issuerService, VCService vcService) {
+    public VerifierServiceImpl(FaunaClient faunaClient, DIDService didServices,IssuerService issuerService, VCService vcService, RestTemplate restTemplate) {
         this.faunaClient = faunaClient;
         this.didServices = didServices;
         this.issuerService = issuerService;
         this.vcService = vcService;
+        this.restTemplate = restTemplate;
     }
     @Override
     public void createVerifier(String name, String govId) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
@@ -103,7 +112,7 @@ public class VerifierServiceImpl implements VerifierService{
     }
 
     @Override
-    public VerificationResult verify_vc(String id, String vcId) throws ExecutionException, InterruptedException {
+    public VerificationResult verify_vc(String id, String vcId, String ticketId, String nftId) throws ExecutionException, InterruptedException, JsonProcessingException {
         VerifiableCredentials vc = vcService.getVcByVCId(vcId);
         String issuerDid = vc.getIssuerDid();
         Verifier verifier = getVerifierById(id);
@@ -126,8 +135,61 @@ public class VerifierServiceImpl implements VerifierService{
                     map.put("AgeVerification", "passed");
                     map.put("StudentVerification", "passed");
                 }
-                vr.setPolicy(map);
             }
+
+
+            String url = "https://ticketing-service-flhm.onrender.com/tickets/scanNft?id=%s&nftId=%s";
+            url = String.format(url, ticketId, nftId);
+
+            System.out.println(url);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Create request entity with headers
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("id", ticketId);
+            requestBody.put("nftId", nftId);
+
+            HttpEntity<?> requestEntity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<String> responseEntity = restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    String.class,
+                    id,
+                    nftId
+            );
+                // Get response status code and body
+            HttpStatus statusCode = (HttpStatus) responseEntity.getStatusCode();
+            String responseBody = responseEntity.getBody();
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(responseBody);
+            String message = jsonNode.get("statusMsg").asText();
+
+            if(statusCode == HttpStatus.OK) {
+                if(responseBody.contains("200")) {
+                    map.put("ScanResult", message);
+                }
+                if (responseBody.contains("409")) {
+                    map.put("ScanResult", message);
+                    vr.setResult("fail");
+                } else if (responseBody.contains("451")) {
+                    map.put("ScanResult", message);
+                    vr.setResult("fail");
+                } else if (responseBody.contains("417")) {
+                    map.put("ScanResult", message);
+                    vr.setResult("fail");
+                }
+            }
+
+            vr.setPolicy(map);
+            // Log response status code and body
+            System.out.println("Response Status Code: " + statusCode);
+            System.out.println("Response Body: " + responseBody);
+
         } else {
             vr.setResult("failed");
             map.put("SignaturePolicy", "failed");
