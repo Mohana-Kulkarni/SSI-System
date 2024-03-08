@@ -168,23 +168,22 @@ public class VerifierServiceImpl implements VerifierService{
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(responseBody);
             String message = jsonNode.get("statusMsg").asText();
+            String status = jsonNode.get("statusCode").asText();
 
             if(statusCode == HttpStatus.OK) {
-                if(responseBody.contains("200")) {
+                if(status.equals("200")) {
                     map.put("ScanResult", message);
-                }
-                if (responseBody.contains("409")) {
-                    map.put("ScanResult", message);
-                    vr.setResult("fail");
-                } else if (responseBody.contains("451")) {
+                } else   if (status.equals("409")) {
                     map.put("ScanResult", message);
                     vr.setResult("fail");
-                } else if (responseBody.contains("417")) {
+                } else if (status.equals("451")) {
+                    map.put("ScanResult", message);
+                    vr.setResult("fail");
+                } else if (status.equals("417")) {
                     map.put("ScanResult", message);
                     vr.setResult("fail");
                 }
             }
-
             vr.setPolicy(map);
             // Log response status code and body
             System.out.println("Response Status Code: " + statusCode);
