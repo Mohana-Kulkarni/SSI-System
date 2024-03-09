@@ -27,8 +27,9 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         this.didService = didService;
     }
     @Override
-    public String addUserDetails(UserDetails userDetails) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
-        userDetails.setUserDid(didService.generatePublicDid());
+    public Map<String, String > addUserDetails(UserDetails userDetails) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+        String userDid = didService.generatePublicDid();
+        userDetails.setUserDid(userDid);
         Map<String, Object> map = new HashMap<>();
         map.put("firstName", userDetails.getFirstName());
         map.put("lastName", userDetails.getLastName());
@@ -49,7 +50,11 @@ public class UserDetailsServiceImpl implements UserDetailsService{
                         )
                 )
         ).get();
-        return val.at("ref").to(Value.RefV.class).get().getId();
+        String id =  val.at("ref").to(Value.RefV.class).get().getId();
+        Map<String, String> result = new HashMap<>();
+        result.put("id", id);
+        result.put("userDid", userDid);
+        return result;
     }
 
     @Override

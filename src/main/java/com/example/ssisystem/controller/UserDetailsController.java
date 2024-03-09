@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -23,7 +24,7 @@ public class UserDetailsController {
     }
 
     @PostMapping("/")
-    public String addUserDetails(@RequestBody UserDetails userDetails) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
+    public Map<String, String> addUserDetails(@RequestBody UserDetails userDetails) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
         return userDetailsService.addUserDetails(userDetails);
     }
     @PutMapping("/update/id")
