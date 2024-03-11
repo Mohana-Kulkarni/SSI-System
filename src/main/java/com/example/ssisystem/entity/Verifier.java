@@ -4,8 +4,9 @@ import java.util.List;
 
 public class Verifier {
     private String id;
-
     private String name;
+    private String email;
+    private String password;
     private String govId;
     private List<String> trustedIssuer;
     private String privateDid;
@@ -14,14 +15,17 @@ public class Verifier {
     public Verifier() {
     }
 
-    public Verifier(String name, String govId) {
+    public Verifier(String name, String govId, String email, String password) {
         this.name = name;
         this.govId = govId;
+        this.email = email;
+        this.password = password;
     }
 
-    public Verifier(String id, String name, String govId, List<String> trustedIssuer, String privateDid, String publicDid) {
+    public Verifier(String id, String name, String email, String govId, List<String> trustedIssuer, String privateDid, String publicDid) {
         this.id = id;
         this.name = name;
+        this.email = email;
         this.govId = govId;
         this.trustedIssuer = trustedIssuer;
         this.privateDid = privateDid;
@@ -73,5 +77,21 @@ public class Verifier {
 
     public void setTrustedIssuer(List<String> trustedIssuer) {
         this.trustedIssuer = trustedIssuer;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
