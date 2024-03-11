@@ -7,6 +7,8 @@ import com.example.ssisystem.service.user.UserDetailsServiceImpl;
 import com.example.ssisystem.service.vc.VCService;
 import com.faunadb.client.FaunaClient;
 import com.faunadb.client.types.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -30,20 +32,25 @@ public class IssuerServiceImpl implements IssuerService{
     private DIDService didServices;
     private UserDetailsService userDetailsService;
     private VCService vcService;
+    private BCryptPasswordEncoder encoder;
 
-    public IssuerServiceImpl(FaunaClient faunaClient, DIDService didServices,VCService vcService, UserDetailsService userDetailsService) {
+    public IssuerServiceImpl(FaunaClient faunaClient, DIDService didServices,VCService vcService, UserDetailsService userDetailsService, BCryptPasswordEncoder encoder) {
         this.faunaClient= faunaClient;
         this.didServices = didServices;
         this.vcService = vcService;
         this.userDetailsService = userDetailsService;
+        this.encoder = encoder;
     }
     @Override
     public void addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         String name = issuer.getName();
         String govId = issuer.getGovId();
+        String encryptedPassword = encoder.encode(issuer.getPassword());
         Map<String, Object> map = new HashMap<>();
         map .put("name", name);
         map.put("govId", govId);
+        map.put("email", issuer.getEmail());
+        map.put("password", encryptedPassword);
         map.put("type", issuer.getType());
         map.put("privateDid", didServices.generatePrivateDid());
         map.put("publicDid", didServices.generatePublicDid());
@@ -67,6 +74,7 @@ public class IssuerServiceImpl implements IssuerService{
 //        IssuerType type = IssuerType.valueOf(issuerType);
 
         return new Issuer(res.at("data", "name").to(String.class).get(),
+                res.at("data", "email").to(String.class).get(),
                 res.at("data", "govId").to(String.class).get(),
                 issuerType,
                 res.at("data", "publicDid").to(String.class).get(),
@@ -77,11 +85,26 @@ public class IssuerServiceImpl implements IssuerService{
     }
 
     @Override
+    public Issuer getIssuerByLogin(String email, String password) throws ExecutionException, InterruptedException {
+        Value res = faunaClient.query(Get(Match(Index("issuer_by_email"), Value(email)))).get();
+        String encryptedPassword = res.at("data", "password").to(String.class).get();
+
+        String encryptedEnteredPassword = encoder.encode(password);
+
+        if (encoder.matches(password, encryptedPassword)) {
+            return getIssuerById(res.at("ref").get(Value.RefV.class).getId());
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public Issuer getIssuerByPublicDid(String did) throws ExecutionException, InterruptedException {
         Value res = faunaClient.query(Get(Match(Index("issuer_by_publicDid"), Value(did)))).get();
         String issuerType = res.at("data", "type").to(String.class).get();
 //        IssuerType type = IssuerType.valueOf(issuerType);
         return new Issuer(res.at("data", "name").to(String.class).get(),
+                res.at("data", "email").to(String.class).get(),
                 res.at("data", "govId").to(String.class).get(),
                 issuerType,
                 res.at("data", "publicDid").to(String.class).get(),

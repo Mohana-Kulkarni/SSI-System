@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 public interface IssuerService {
     void addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException;
     Issuer getIssuerById(String id) throws ExecutionException, InterruptedException;
+    Issuer getIssuerByLogin(String email, String password) throws ExecutionException, InterruptedException;
     Issuer getIssuerByPublicDid(String did) throws ExecutionException, InterruptedException;
     void addPendingRequests(String userDetailsId, String issuerDid) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException;
     void addIssuedVCs(String issuerDid,String vcId) throws ExecutionException, InterruptedException;

@@ -1,5 +1,6 @@
 package com.example.ssisystem.controller;
 
+import com.example.ssisystem.entity.Credentials;
 import com.example.ssisystem.entity.Issuer;
 import com.example.ssisystem.entity.Request;
 import com.example.ssisystem.service.issuer.IssuerService;
@@ -27,6 +28,11 @@ public class IssuerController {
     @GetMapping("/did")
     public Issuer getIssuerByPublicDId(@RequestParam("did") String did) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
         return issuerService.getIssuerByPublicDid(did);
+    }
+
+    @PostMapping("/login")
+    public Issuer getIssuerByLogin(@RequestBody Credentials credentials) throws ExecutionException, InterruptedException {
+        return issuerService.getIssuerByLogin(credentials.getEmail(), credentials.getPassword());
     }
 
     @PostMapping("/request")
