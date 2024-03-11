@@ -9,17 +9,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.faunadb.client.FaunaClient;
 import com.faunadb.client.types.Value;
-import okhttp3.Response;
 import org.springframework.http.*;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,28 +33,32 @@ public class VerifierServiceImpl implements VerifierService{
     private IssuerService issuerService;
     private VCService vcService;
     private RestTemplate restTemplate;
+    private BCryptPasswordEncoder encoder;
 
-    public VerifierServiceImpl(FaunaClient faunaClient, DIDService didServices,IssuerService issuerService, VCService vcService, RestTemplate restTemplate) {
+    public VerifierServiceImpl(FaunaClient faunaClient, DIDService didServices,IssuerService issuerService, VCService vcService, RestTemplate restTemplate, BCryptPasswordEncoder encoder) {
         this.faunaClient = faunaClient;
         this.didServices = didServices;
         this.issuerService = issuerService;
         this.vcService = vcService;
         this.restTemplate = restTemplate;
+        this.encoder = encoder;
     }
     @Override
-    public void createVerifier(String name, String govId) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+    public void createVerifier(String name, String email, String password, String govId) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", name);
+        map.put("email", email);
+        String encryptedPassword = encoder.encode(password);
+        map.put("password", encryptedPassword);
+        map.put("govId", govId);
+        map.put("trustedIssuer", new ArrayList<>());
+        map.put("privateDid", didServices.generatePrivateDid());
+        map.put("publicDid", didServices.generatePublicDid());
         faunaClient.query(
                 Create(
                         Collection("Verifier"),
                         Obj(
-                                "data",
-                                Obj(
-                                        "name", Value(name),
-                                        "govId", Value(govId),
-                                        "trustedIssuer", Value(new ArrayList<>()),
-                                        "privateDid", Value(didServices.generatePrivateDid()),
-                                        "publicDid", Value(didServices.generatePublicDid())
-                                )
+                                "data",Value(map)
                         )
                 )
         );
@@ -85,11 +86,24 @@ public class VerifierServiceImpl implements VerifierService{
         return new Verifier(
                 value.at("ref").to(Value.RefV.class).get().getId(),
                 value.at("data", "name").to(String.class).get(),
+                value.at("data", "email").to(String.class).get(),
                 value.at("data", "govId").to(String.class).get(),
                 value.at("data", "trustedIssuer").collect(String.class).stream().toList(),
                 value.at("data", "privateDid").to(String.class).get(),
                 value.at("data", "publicDid").to(String.class).get()
         );
+    }
+
+    @Override
+    public Verifier getVeriferByLogin(String email, String password) throws ExecutionException, InterruptedException {
+        Value res = faunaClient.query(Get(Match(Index("verifier_by_email"), Value(email)))).get();
+        String encryptedPassword = res.at("data", "password").to(String.class).get();
+
+        if (encoder.matches(password, encryptedPassword)) {
+            return getVerifierById(res.at("ref").get(Value.RefV.class).getId());
+        } else {
+            return null;
+        }
     }
 
     @Override

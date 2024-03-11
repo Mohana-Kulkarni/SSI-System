@@ -1,5 +1,6 @@
 package com.example.ssisystem.controller;
 
+import com.example.ssisystem.entity.Credentials;
 import com.example.ssisystem.entity.VerificationResult;
 import com.example.ssisystem.entity.Verifier;
 import com.example.ssisystem.service.verifier.VerifierService;
@@ -28,9 +29,14 @@ public class VerifierController {
         return verifierService.verify_vc(id, vcId, ticketId, nftId);
     }
 
+    @PostMapping("/login")
+    public Verifier getVerifierByLogin(@RequestBody Credentials credentials) throws ExecutionException, InterruptedException {
+        return verifierService.getVeriferByLogin(credentials.getEmail(), credentials.getPassword());
+    }
+
     @PostMapping("/")
     public void addVerifier(@RequestBody Verifier verifier) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
-        verifierService.createVerifier(verifier.getName(), verifier.getGovId());
+        verifierService.createVerifier(verifier.getName(), verifier.getEmail(), verifier.getPassword(), verifier.getGovId());
     }
 
     @PostMapping("/issuer")
