@@ -1,11 +1,15 @@
 package com.example.ssisystem.entity;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 public class Issuer implements Serializable {
     String name;
+    String email;
+    String password;
     String govId;
     private String privateDid;
     private String publicDid;
@@ -17,13 +21,16 @@ public class Issuer implements Serializable {
     public Issuer() {
     }
 
-    public Issuer(String name, String govId) {
+    public Issuer(String name, String govId, String email, String password) {
         this.name = name;
         this.govId = govId;
+        this.email = email;
+        this.password = password;
     }
 
-    public Issuer(String name, String govId, String type, String publicDid, String privateDid, List<String> issuedVCs, List<String> pendingRequests, List<String> rejectedRequests) {
+    public Issuer(String name, String email, String govId, String type, String publicDid, String privateDid, List<String> issuedVCs, List<String> pendingRequests, List<String> rejectedRequests) {
         this.name = name;
+        this.email = email;
         this.govId = govId;
         this.type = type;
         this.publicDid = publicDid;
@@ -93,6 +100,21 @@ public class Issuer implements Serializable {
 
     public void setRejectedRequests(List<String> rejectedRequests) {
         this.rejectedRequests = rejectedRequests;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }
