@@ -201,11 +201,11 @@ public class IssuerServiceImpl implements IssuerService{
             resultList.addAll(userDetails.getVerificationResult());
             resultList.add(result);
             userDetails.setVerificationResult(resultList);
-            userDetailsService.updateUserDetails(userDetailsId, userDetails);
-            List<String> rejectedRequests = new ArrayList<>();
-            rejectedRequests.addAll(issuer.getRejectedRequests());
-            rejectedRequests.add(userDetailsId);
-            issuer.setRejectedRequests(rejectedRequests);
+//            userDetailsService.updateUserDetails(userDetailsId, userDetails);
+//            List<String> rejectedRequests = new ArrayList<>();
+//            rejectedRequests.addAll(issuer.getRejectedRequests());
+//            rejectedRequests.add(userDetailsId);
+//            issuer.setRejectedRequests(rejectedRequests);
             System.out.println("Problem in generating VC !!");
 
         } else {
@@ -272,6 +272,11 @@ public class IssuerServiceImpl implements IssuerService{
             issuedVCs.addAll(issuer.getIssuedVCs());
             issuedVCs.add(vcId);
             issuer.setIssuedVCs(issuedVCs);
+        } else {
+            List<String> rejectedRequests = new ArrayList<>();
+            rejectedRequests.addAll(issuer.getRejectedRequests());
+            rejectedRequests.add(userDetailsId);
+            issuer.setRejectedRequests(rejectedRequests);
         }
         updateIssuer(did, issuer);
     }
