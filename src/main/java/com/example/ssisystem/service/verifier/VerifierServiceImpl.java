@@ -107,6 +107,13 @@ public class VerifierServiceImpl implements VerifierService{
     }
 
     @Override
+    public Verifier getVerifierByWalletId(String walletId) throws ExecutionException, InterruptedException {
+        Value res = faunaClient.query(Get(Match(Index("verifier_by_walletId"), Value(walletId)))).get();
+        return getVerifierById(res.at("ref").get(Value.RefV.class).getId());
+    }
+
+
+    @Override
     public void updateVerifier(String id, Verifier verifier) {
         faunaClient.query(
                 Update(

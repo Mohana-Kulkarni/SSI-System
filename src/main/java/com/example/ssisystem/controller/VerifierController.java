@@ -24,11 +24,14 @@ public class VerifierController {
     public Verifier getVerifierById(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
         return verifierService.getVerifierById(id);
     }
+    @GetMapping("/wallet")
+    public Verifier getVerifierByWalletId(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
+        return verifierService.getVerifierByWalletId(id);
+    }
     @GetMapping("/result")
     public VerificationResult verifyVCs(@RequestParam("id") String id, @RequestParam("vcId") String vcId, @RequestParam("ticketId") String ticketId, @RequestParam("nftId") String nftId) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, JsonProcessingException {
         return verifierService.verify_vc(id, vcId, ticketId, nftId);
     }
-
     @PostMapping("/login")
     public Verifier getVerifierByLogin(@RequestBody Credentials credentials) throws ExecutionException, InterruptedException {
         return verifierService.getVeriferByLogin(credentials.getEmail(), credentials.getPassword());
