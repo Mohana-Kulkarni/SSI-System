@@ -1,8 +1,6 @@
 package com.example.ssisystem.controller;
 
-import com.example.ssisystem.entity.Credentials;
-import com.example.ssisystem.entity.Issuer;
-import com.example.ssisystem.entity.Request;
+import com.example.ssisystem.entity.*;
 import com.example.ssisystem.service.issuer.IssuerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +32,21 @@ public class IssuerController {
     @GetMapping("/type")
     public List<Issuer> getIssuerByType(@RequestParam("type") String type) throws ExecutionException, InterruptedException {
         return issuerService.getIssuerByType(type);
+    }
+
+    @GetMapping("/pending")
+    public List<UserDetails> getPendingRequests(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
+        return issuerService.getPendingRequestsByIssuer(id);
+    }
+
+    @GetMapping("/rejected")
+    public List<UserDetails> getRejectedRequests(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
+        return issuerService.getRejectedRequestsByIssuer(id);
+    }
+
+    @GetMapping("/issued")
+    public List<VerifiableCredentials> getIssuedVCs(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
+        return issuerService.getVCsIssuedByIssuer(id);
     }
     @PostMapping("/login")
     public Issuer getIssuerByLogin(@RequestBody Credentials credentials) throws ExecutionException, InterruptedException {
