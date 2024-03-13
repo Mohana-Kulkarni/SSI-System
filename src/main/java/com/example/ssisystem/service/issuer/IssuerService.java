@@ -13,6 +13,7 @@ public interface IssuerService {
     Issuer getIssuerById(String id) throws ExecutionException, InterruptedException;
     Issuer getIssuerByLogin(String email, String password) throws ExecutionException, InterruptedException;
     Issuer getIssuerByPublicDid(String did) throws ExecutionException, InterruptedException;
+    List<Issuer> getIssuerByType(String type) throws ExecutionException, InterruptedException;
     void addPendingRequests(String userDetailsId, String issuerDid) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException;
     void addIssuedVCs(String issuerDid,String vcId) throws ExecutionException, InterruptedException;
     void updateIssuer(String did, Issuer issuer) throws ExecutionException, InterruptedException;

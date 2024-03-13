@@ -11,6 +11,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -30,6 +31,10 @@ public class IssuerController {
         return issuerService.getIssuerByPublicDid(did);
     }
 
+    @GetMapping("/type")
+    public List<Issuer> getIssuerByType(@RequestParam("type") String type) throws ExecutionException, InterruptedException {
+        return issuerService.getIssuerByType(type);
+    }
     @PostMapping("/login")
     public Issuer getIssuerByLogin(@RequestBody Credentials credentials) throws ExecutionException, InterruptedException {
         return issuerService.getIssuerByLogin(credentials.getEmail(), credentials.getPassword());
