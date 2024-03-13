@@ -14,25 +14,29 @@ public class Issuer implements Serializable {
     private String privateDid;
     private String publicDid;
     private String type;
-    List<String> pendingRequests;
+    private String walletId;
+
+    private List<String> pendingRequests;
     private List<String> issuedVCs;
-    List<String> rejectedRequests;
+    private List<String> rejectedRequests;
 
     public Issuer() {
     }
 
-    public Issuer(String name, String govId, String email, String password) {
+    public Issuer(String name, String govId, String email, String password, String walletId) {
         this.name = name;
         this.govId = govId;
         this.email = email;
         this.password = password;
+        this.walletId = walletId;
     }
 
-    public Issuer(String name, String email, String govId, String type, String publicDid, String privateDid, List<String> issuedVCs, List<String> pendingRequests, List<String> rejectedRequests) {
+    public Issuer(String name, String email, String govId, String type, String walletId, String publicDid, String privateDid, List<String> issuedVCs, List<String> pendingRequests, List<String> rejectedRequests) {
         this.name = name;
         this.email = email;
         this.govId = govId;
         this.type = type;
+        this.walletId = walletId;
         this.publicDid = publicDid;
         this.privateDid = privateDid;
         this.issuedVCs = issuedVCs;
@@ -115,6 +119,13 @@ public class Issuer implements Serializable {
     }
     public void setPassword(String password) {
         this.password = password;
+    }
+    public String getWalletId() {
+        return walletId;
+    }
+
+    public void setWalletId(String walletId) {
+        this.walletId = walletId;
     }
 
 }
