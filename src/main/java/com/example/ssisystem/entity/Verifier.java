@@ -8,6 +8,7 @@ public class Verifier {
     private String email;
     private String password;
     private String govId;
+    private String walletId;
     private List<String> trustedIssuer;
     private String privateDid;
     private String publicDid;
@@ -93,5 +94,13 @@ public class Verifier {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getWalletId() {
+        return walletId;
+    }
+
+    public void setWalletId(String walletId) {
+        this.walletId = walletId;
     }
 }
