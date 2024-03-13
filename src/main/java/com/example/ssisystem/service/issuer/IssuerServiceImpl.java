@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static com.faunadb.client.query.Language.*;
@@ -71,7 +72,6 @@ public class IssuerServiceImpl implements IssuerService{
     public Issuer getIssuerById(String id) throws ExecutionException, InterruptedException {
         Value res = faunaClient.query(Get(Ref(Collection("Issuer"), id))).get();
         String issuerType = res.at("data", "type").to(String.class).get();
-//        IssuerType type = IssuerType.valueOf(issuerType);
 
         return new Issuer(res.at("data", "name").to(String.class).get(),
                 res.at("data", "email").to(String.class).get(),
@@ -102,7 +102,6 @@ public class IssuerServiceImpl implements IssuerService{
     public Issuer getIssuerByPublicDid(String did) throws ExecutionException, InterruptedException {
         Value res = faunaClient.query(Get(Match(Index("issuer_by_publicDid"), Value(did)))).get();
         String issuerType = res.at("data", "type").to(String.class).get();
-//        IssuerType type = IssuerType.valueOf(issuerType);
         return new Issuer(res.at("data", "name").to(String.class).get(),
                 res.at("data", "email").to(String.class).get(),
                 res.at("data", "govId").to(String.class).get(),
@@ -112,6 +111,22 @@ public class IssuerServiceImpl implements IssuerService{
                 res.at("data", "issuedVCs").collect(String.class).stream().toList(),
                 res.at("data", "pendingRequests").collect(String.class).stream().toList(),
                 res.at("data", "rejectedRequests").collect(String.class).stream().toList());
+    }
+
+    @Override
+    public List<Issuer> getIssuerByType(String type) throws ExecutionException, InterruptedException {
+        CompletableFuture<Value> res = faunaClient.query(Paginate(Documents(Collection("Issuer"))));
+        Value value = res.join();
+        List<Value> valueList = value.at("data").collect(Value.class).stream().toList();
+        List<Issuer> issuers = new ArrayList<>();
+        for (Value val : valueList) {
+            String issuerId = ((Value.RefV)val).getId();
+            Issuer issuer = getIssuerById(issuerId);
+            if (issuer.getType().equals(type)) {
+                issuers.add(issuer);
+            }
+        }
+        return issuers;
     }
 
 
@@ -201,15 +216,10 @@ public class IssuerServiceImpl implements IssuerService{
             resultList.addAll(userDetails.getVerificationResult());
             resultList.add(result);
             userDetails.setVerificationResult(resultList);
-//            userDetailsService.updateUserDetails(userDetailsId, userDetails);
-//            List<String> rejectedRequests = new ArrayList<>();
-//            rejectedRequests.addAll(issuer.getRejectedRequests());
-//            rejectedRequests.add(userDetailsId);
-//            issuer.setRejectedRequests(rejectedRequests);
             System.out.println("Problem in generating VC !!");
 
         } else {
-            VerifiableCredentials vc = vcService.issueCredentials(userDetails,issuer, String.valueOf(issuer.getType()), issuer.getPrivateDid());
+            VerifiableCredentials vc = vcService.issueCredentials(userDetails, issuer, issuer.getType(), issuer.getPrivateDid());
             vcId = vc.getId();
             res = true;
         }
