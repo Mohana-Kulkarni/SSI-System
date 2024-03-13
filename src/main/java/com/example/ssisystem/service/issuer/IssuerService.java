@@ -13,6 +13,7 @@ public interface IssuerService {
     Issuer getIssuerById(String id) throws ExecutionException, InterruptedException;
     Issuer getIssuerByLogin(String email, String password) throws ExecutionException, InterruptedException;
     Issuer getIssuerByPublicDid(String did) throws ExecutionException, InterruptedException;
+    Issuer getIssuerByWalletId(String walletId) throws ExecutionException, InterruptedException;
     List<Issuer> getIssuerByType(String type) throws ExecutionException, InterruptedException;
     List<UserDetails> getPendingRequestsByIssuer(String issuerId) throws ExecutionException, InterruptedException;
     List<UserDetails> getRejectedRequestsByIssuer(String issuerId) throws ExecutionException, InterruptedException;

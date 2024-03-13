@@ -77,6 +77,7 @@ public class IssuerServiceImpl implements IssuerService{
                 res.at("data", "email").to(String.class).get(),
                 res.at("data", "govId").to(String.class).get(),
                 issuerType,
+                res.at("data", "walletId").to(String.class).get(),
                 res.at("data", "publicDid").to(String.class).get(),
                 res.at("data", "privateDid").to(String.class).get(),
                 res.at("data", "issuedVCs").collect(String.class).stream().toList(),
@@ -101,16 +102,13 @@ public class IssuerServiceImpl implements IssuerService{
     @Override
     public Issuer getIssuerByPublicDid(String did) throws ExecutionException, InterruptedException {
         Value res = faunaClient.query(Get(Match(Index("issuer_by_publicDid"), Value(did)))).get();
-        String issuerType = res.at("data", "type").to(String.class).get();
-        return new Issuer(res.at("data", "name").to(String.class).get(),
-                res.at("data", "email").to(String.class).get(),
-                res.at("data", "govId").to(String.class).get(),
-                issuerType,
-                res.at("data", "publicDid").to(String.class).get(),
-                res.at("data", "privateDid").to(String.class).get(),
-                res.at("data", "issuedVCs").collect(String.class).stream().toList(),
-                res.at("data", "pendingRequests").collect(String.class).stream().toList(),
-                res.at("data", "rejectedRequests").collect(String.class).stream().toList());
+        return getIssuerById(res.at("ref").get(Value.RefV.class).getId());
+    }
+
+    @Override
+    public Issuer getIssuerByWalletId(String walletId) throws ExecutionException, InterruptedException {
+        Value res = faunaClient.query(Get(Match(Index("issuer_by_walletId"), Value(walletId)))).get();
+        return getIssuerById(res.at("ref").get(Value.RefV.class).getId());
     }
 
     @Override

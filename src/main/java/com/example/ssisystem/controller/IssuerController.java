@@ -29,6 +29,11 @@ public class IssuerController {
         return issuerService.getIssuerByPublicDid(did);
     }
 
+    @GetMapping("/wallet")
+    public Issuer getIssuerByWalletId(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
+        return issuerService.getIssuerByWalletId(id);
+    }
+
     @GetMapping("/type")
     public List<Issuer> getIssuerByType(@RequestParam("type") String type) throws ExecutionException, InterruptedException {
         return issuerService.getIssuerByType(type);
