@@ -129,6 +129,39 @@ public class IssuerServiceImpl implements IssuerService{
         return issuers;
     }
 
+    @Override
+    public List<UserDetails> getPendingRequestsByIssuer(String issuerId) throws ExecutionException, InterruptedException {
+        List<UserDetails> requests = new ArrayList<>();
+        Issuer issuer = getIssuerById(issuerId);
+        for(String id: issuer.getPendingRequests()) {
+            UserDetails details = userDetailsService.getUserById(id);
+            requests.add(details);
+        }
+        return requests;
+    }
+
+    @Override
+    public List<UserDetails> getRejectedRequestsByIssuer(String issuerId) throws ExecutionException, InterruptedException {
+        List<UserDetails> rejected = new ArrayList<>();
+        Issuer issuer = getIssuerById(issuerId);
+        for(String id: issuer.getRejectedRequests()) {
+            UserDetails details = userDetailsService.getUserById(id);
+            rejected.add(details);
+        }
+        return rejected;
+    }
+
+    @Override
+    public List<VerifiableCredentials> getVCsIssuedByIssuer(String issuerId) throws ExecutionException, InterruptedException {
+        List<VerifiableCredentials> vcs = new ArrayList<>();
+        Issuer issuer = getIssuerById(issuerId);
+        for(String id: issuer.getIssuedVCs()) {
+            VerifiableCredentials vc = vcService.getVcByVCId(id);
+            vcs.add(vc);
+        }
+        return vcs;
+    }
+
 
     @Override
     public void addPendingRequests(String userDetailsId, String issuerDid) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
