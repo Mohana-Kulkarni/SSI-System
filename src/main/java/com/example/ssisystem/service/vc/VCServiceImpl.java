@@ -1,6 +1,7 @@
 package com.example.ssisystem.service.vc;
 
 import com.example.ssisystem.entity.*;
+import com.example.ssisystem.exception.classes.ResourceNotFoundException;
 import com.example.ssisystem.service.did.DIDService;
 import com.faunadb.client.FaunaClient;
 import com.faunadb.client.types.Value;
@@ -90,64 +91,61 @@ public class VCServiceImpl implements VCService{
 
     @Override
     public VerifiableCredentials getVCById(String id) throws ExecutionException, InterruptedException {
-        Value value = faunaClient.query(Get(Ref(Collection("Verifiable_Credentials"), id))).get();
-        String expirationDate = value.at("data", "expirationDate").to(String.class).get();
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a");
-//        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//        LocalDateTime expiration = LocalDateTime.parse(expirationDate, formatter);
-//        LocalDateTime issuanceDate = expiration.minusDays(30);
-//        String issuanceStr = issuanceDate.format(dateFormatter);
-
-        String issuanceStr = value.at("data", "proof", "created").to(String.class).get();
-//        List<String> issuedVCs = new ArrayList<>();
-//        if(value.at("data", "issuedVCs") != null) {
-//            issuedVCs.addAll(value.at("data", "issuedVCs").collect(String.class));
-//        }
-        UserDetails userDetails = new UserDetails(
-                value.at("data", "subject", "userDid").to(String.class).get(),
-                value.at("data", "subject", "firstName").to(String.class).get(),
-                value.at("data", "subject", "lastName").to(String.class).get(),
-                value.at("data", "subject", "address").to(String.class).get(),
-                value.at("data", "subject", "dateOfBirth").to(String.class).get(),
-                value.at("data", "subject", "gender").to(String.class).get(),
-                value.at("data", "subject", "placeOfBirth").to(String.class).get(),
-                value.at("data", "subject", "proofId").to(String.class).get(),
-                value.at("data", "subject", "docType").to(String.class).get(),
-                value.at("data", "subject", "verificationResult").collect(VerificationResult.class).stream().toList(),
-                value.at("data", "subject", "issuedVCs").collect(String.class).stream().toList()
-        );
-
-        ProofUtil proof = new ProofUtil(
-                value.at("data", "proof", "proofType").to(String.class).get(),
-                value.at("data", "proof", "verificationMethod").to(String.class).get(),
-                value.at("data", "proof", "jws").to(String.class).get(),
-                value.at("data", "proof", "created").to(String.class).get(),
-                value.at("data", "proof", "proofPurpose").to(String.class).get()
-        );
-        return new VerifiableCredentials(
-                value.at("data", "vcId").to(String.class).get(),
-                userDetails,
-                value.at("data", "issuer").to(String.class).get(),
-                "LD_Proof",
-                issuanceStr,
-                expirationDate,
-                issuanceStr,
-                proof
-        );
+        try {
+            Value value = faunaClient.query(Get(Ref(Collection("Verifiable_Credentials"), id))).get();
+            String expirationDate = value.at("data", "expirationDate").to(String.class).get();
+            String issuanceStr = value.at("data", "proof", "created").to(String.class).get();
+//        UserDetails userDetails = new UserDetails(
+//                value.at("data", "subject", "userDid").to(String.class).get(),
+//                value.at("data", "subject", "firstName").to(String.class).get(),
+//                value.at("data", "subject", "lastName").to(String.class).get(),
+//                value.at("data", "subject", "address").to(String.class).get(),
+//                value.at("data", "subject", "dateOfBirth").to(String.class).get(),
+//                value.at("data", "subject", "gender").to(String.class).get(),
+//                value.at("data", "subject", "placeOfBirth").to(String.class).get(),
+//                value.at("data", "subject", "proofId").to(String.class).get(),
+//                value.at("data", "subject", "docType").to(String.class).get(),
+//                value.at("data", "subject", "verificationResult").collect(VerificationResult.class).stream().toList(),
+//                value.at("data", "subject", "issuedVCs").collect(String.class).stream().toList()
+//        );
+            UserDetails userDetails = (UserDetails) value.at("data", "subject").collect(UserDetails.class).stream();
+            ProofUtil proof = new ProofUtil(
+                    value.at("data", "proof", "proofType").to(String.class).get(),
+                    value.at("data", "proof", "verificationMethod").to(String.class).get(),
+                    value.at("data", "proof", "jws").to(String.class).get(),
+                    value.at("data", "proof", "created").to(String.class).get(),
+                    value.at("data", "proof", "proofPurpose").to(String.class).get()
+            );
+            return new VerifiableCredentials(
+                    value.at("data", "vcId").to(String.class).get(),
+                    userDetails,
+                    value.at("data", "issuer").to(String.class).get(),
+                    "LD_Proof",
+                    issuanceStr,
+                    expirationDate,
+                    issuanceStr,
+                    proof
+            );
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("VC", "id", id);
+        }
     }
 
     @Override
     public VerifiableCredentials getVcByVCId(String vcId) throws ExecutionException, InterruptedException {
-        Value value = faunaClient.query(Get(Match(Index("verifiable_credentials_by_vcId"), Value(vcId)))).get();
-        String id = value.at("ref").get(Value.RefV.class).getId();
-        return getVCById(id);
+        try {
+            Value value = faunaClient.query(Get(Match(Index("verifiable_credentials_by_vcId"), Value(vcId)))).get();
+            String id = value.at("ref").get(Value.RefV.class).getId();
+            return getVCById(id);
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("VC", "vcId", vcId);
+        }
     }
 
 
     @Override
     @Scheduled(cron = "0 0 0 * * *")
     public void updateVCStatus() throws ExecutionException, InterruptedException {
-
         CompletableFuture<Value> result = faunaClient.query(
                 Paginate(Documents(Collection("Verifiable_Credentials")))
         );
