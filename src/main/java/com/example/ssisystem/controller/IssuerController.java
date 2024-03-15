@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -87,10 +88,11 @@ public class IssuerController {
     }
     @PostMapping("/")
     public ResponseEntity<SuccessResponse> addIssuer(@RequestBody Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
-        if(issuerService.addIssuer(issuer) != null) {
+        Map<String, String > map = issuerService.addIssuer(issuer);
+        if(map.get("result").equals("true")) {
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new SuccessResponse(GlobalConstants.STATUS_201, GlobalConstants.MESSAGE_201_Issuer));
+                    .body(new SuccessResponse(GlobalConstants.STATUS_201, map));
 
         }
         return ResponseEntity

@@ -46,12 +46,13 @@ public class IssuerServiceImpl implements IssuerService{
         this.encoder = encoder;
     }
     @Override
-    public String addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+    public Map<String, String> addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+        Map<String, String> res = new HashMap<>();
         try{
-            Issuer issuer1 = getIssuerByWalletId(issuer.getWalletId());
-            if(issuer1 != null) {
-                throw new ResourceAlreadyExistsException("Issuer Already Exists!!!");
-            }
+//            Issuer issuer1 = getIssuerByWalletId(issuer.getWalletId());
+//            if(issuer1 != null) {
+//                throw new ResourceAlreadyExistsException("Issuer Already Exists!!!");
+//            }
             String name = issuer.getName();
             String govId = issuer.getGovId();
             String encryptedPassword = encoder.encode(issuer.getPassword());
@@ -60,9 +61,11 @@ public class IssuerServiceImpl implements IssuerService{
             map.put("govId", govId);
             map.put("email", issuer.getEmail());
             map.put("password", encryptedPassword);
+            map.put("walletId", issuer.getWalletId());
             map.put("type", issuer.getType());
             map.put("privateDid", didServices.generatePrivateDid());
-            map.put("publicDid", didServices.generatePublicDid());
+            String publicDid = didServices.generatePublicDid();
+            map.put("publicDid", publicDid);
             map.put("pendingRequests", new ArrayList<>());
             map.put("issuedVCs", new ArrayList<>());
             map.put("rejectedRequests", new ArrayList<>());
@@ -74,7 +77,10 @@ public class IssuerServiceImpl implements IssuerService{
                             )
                     )
             ).get();
-            return val.at("ref").get(Value.RefV.class).getId();
+            res.put("result", "true");
+            res.put("publicDid", publicDid);
+            res.put("id", val.at("ref").get(Value.RefV.class).getId());
+            return res;
         }catch (Exception e) {
             throw new RuntimeException(GlobalConstants.MESSAGE_417_POST);
         }
@@ -110,14 +116,10 @@ public class IssuerServiceImpl implements IssuerService{
 
             String encryptedEnteredPassword = encoder.encode(password);
 
-            try{
-                if(!encoder.matches(password, encryptedPassword)) {
-                    throw new RuntimeException("Invalid Login Credentials!!");
-                }
-                return getIssuerById(res.at("ref").get(Value.RefV.class).getId());
-            } catch (Exception e) {
-                throw new RuntimeException("Invalid Login Credentials!!");
+            if(!encoder.matches(password, encryptedPassword)) {
+                return null;
             }
+            return getIssuerById(res.at("ref").get(Value.RefV.class).getId());
         } catch (Exception e) {
             throw new ResourceNotFoundException("Issuer", "Email", email);
         }

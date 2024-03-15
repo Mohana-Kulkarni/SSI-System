@@ -6,10 +6,11 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public interface IssuerService {
-    String addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException;
+    Map<String, String> addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException;
     Issuer getIssuerById(String id) throws ExecutionException, InterruptedException;
     Issuer getIssuerByLogin(String email, String password) throws ExecutionException, InterruptedException;
     Issuer getIssuerByPublicDid(String did) throws ExecutionException, InterruptedException;

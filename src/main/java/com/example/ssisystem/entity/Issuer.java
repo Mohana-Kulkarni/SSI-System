@@ -23,11 +23,12 @@ public class Issuer implements Serializable {
     public Issuer() {
     }
 
-    public Issuer(String name, String govId, String email, String password, String walletId) {
+    public Issuer(String name, String govId, String email, String password, String type, String walletId) {
         this.name = name;
         this.govId = govId;
         this.email = email;
         this.password = password;
+        this.type = type;
         this.walletId = walletId;
     }
 
