@@ -12,5 +12,5 @@ import java.util.concurrent.ExecutionException;
 public interface UserDetailsService {
     Map<String, String> addUserDetails(UserDetails userDetails) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException;
     UserDetails getUserById(String id) throws ExecutionException, InterruptedException;
-    void updateUserDetails(String id, UserDetails userDetails) throws ExecutionException, InterruptedException;
+    boolean updateUserDetails(String id, UserDetails userDetails) throws ExecutionException, InterruptedException;
 }
