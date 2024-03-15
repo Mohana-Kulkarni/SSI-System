@@ -13,12 +13,12 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public interface VerifierService {
-    void createVerifier(String name, String email, String password, String govId) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException;
-    void addTrustedIssuers(String id, String issuerDid) throws ExecutionException, InterruptedException;
+    Map<String, String> createVerifier(String name, String email, String password, String govId, String walletId) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException;
+    boolean addTrustedIssuers(String id, String issuerDid) throws ExecutionException, InterruptedException;
     Verifier getVerifierById(String id) throws ExecutionException, InterruptedException;
     Verifier getVeriferByLogin(String email, String password) throws ExecutionException, InterruptedException;
     Verifier getVerifierByWalletId(String walletId) throws ExecutionException, InterruptedException;
-    void updateVerifier(String id, Verifier verifier);
+    boolean updateVerifier(String id, Verifier verifier);
     VerificationResult verify_vc(String id, String vcId, String ticketId, String nftId) throws ExecutionException, InterruptedException, JsonProcessingException;
 
 }
