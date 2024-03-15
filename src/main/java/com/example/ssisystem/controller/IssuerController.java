@@ -1,8 +1,12 @@
 package com.example.ssisystem.controller;
 
+import com.example.ssisystem.constants.GlobalConstants;
 import com.example.ssisystem.entity.*;
+import com.example.ssisystem.exception.response.SuccessResponse;
 import com.example.ssisystem.service.issuer.IssuerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -20,65 +24,103 @@ public class IssuerController {
     private IssuerService issuerService;
 
     @GetMapping("/id")
-    public Issuer getIssuerById(@RequestParam("id") String id) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
-        return issuerService.getIssuerById(id);
+    public ResponseEntity<Issuer> getIssuerById(@RequestParam("id") String id) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
+        return ResponseEntity.status(HttpStatus.OK).body(issuerService.getIssuerById(id));
     }
 
     @GetMapping("/did")
-    public Issuer getIssuerByPublicDId(@RequestParam("did") String did) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
-        return issuerService.getIssuerByPublicDid(did);
+    public ResponseEntity<Issuer> getIssuerByPublicDId(@RequestParam("did") String did) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
+        return ResponseEntity.status(HttpStatus.OK).body(issuerService.getIssuerByPublicDid(did));
     }
 
     @GetMapping("/wallet")
-    public Issuer getIssuerByWalletId(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
-        return issuerService.getIssuerByWalletId(id);
+    public ResponseEntity<Issuer> getIssuerByWalletId(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
+        return ResponseEntity.status(HttpStatus.OK).body(issuerService.getIssuerByWalletId(id));
     }
 
     @GetMapping("/type")
-    public List<Issuer> getIssuerByType(@RequestParam("type") String type) throws ExecutionException, InterruptedException {
-        return issuerService.getIssuerByType(type);
+    public ResponseEntity<List<Issuer>> getIssuerByType(@RequestParam("type") String type) throws ExecutionException, InterruptedException {
+        return ResponseEntity.status(HttpStatus.OK).body(issuerService.getIssuerByType(type));
     }
 
     @GetMapping("/pending")
-    public List<UserDetails> getPendingRequests(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
-        return issuerService.getPendingRequestsByIssuer(id);
+    public ResponseEntity<List<UserDetails>> getPendingRequests(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
+        return ResponseEntity.status(HttpStatus.OK).body(issuerService.getPendingRequestsByIssuer(id));
     }
 
     @GetMapping("/rejected")
-    public List<UserDetails> getRejectedRequests(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
-        return issuerService.getRejectedRequestsByIssuer(id);
+    public ResponseEntity<List<UserDetails>> getRejectedRequests(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
+        return ResponseEntity.status(HttpStatus.OK).body(issuerService.getRejectedRequestsByIssuer(id));
     }
 
     @GetMapping("/issued")
-    public List<VerifiableCredentials> getIssuedVCs(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
-        return issuerService.getVCsIssuedByIssuer(id);
+    public ResponseEntity<List<VerifiableCredentials>> getIssuedVCs(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
+        return ResponseEntity.status(HttpStatus.OK).body(issuerService.getVCsIssuedByIssuer(id));
     }
     @PostMapping("/login")
-    public Issuer getIssuerByLogin(@RequestBody Credentials credentials) throws ExecutionException, InterruptedException {
-        return issuerService.getIssuerByLogin(credentials.getEmail(), credentials.getPassword());
+    public ResponseEntity<Issuer> getIssuerByLogin(@RequestBody Credentials credentials) throws ExecutionException, InterruptedException {
+        return ResponseEntity.status(HttpStatus.OK).body(issuerService.getIssuerByLogin(credentials.getEmail(), credentials.getPassword()));
     }
 
     @PostMapping("/request")
-    public void getVCRequest(@RequestBody Request request) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
-        issuerService.addPendingRequests(request.getUserId(), request.getIssuerDid());
+    public ResponseEntity<SuccessResponse> getVCRequest(@RequestBody Request request) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
+        if(issuerService.addPendingRequests(request.getUserId(), request.getIssuerDid())) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new SuccessResponse(GlobalConstants.STATUS_200, GlobalConstants.MESSAGE_200));
+        }
+        return ResponseEntity
+                .status(HttpStatus.EXPECTATION_FAILED)
+                .body(new SuccessResponse(GlobalConstants.STATUS_417, GlobalConstants.MESSAGE_417_POST));
     }
 
     @PostMapping("/issueVC")
-    public void issueVC(@RequestBody Request request) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
-        issuerService.issueVC(request.getUserId(), request.getIssuerDid());
+    public ResponseEntity<SuccessResponse> issueVC(@RequestBody Request request) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
+        if(issuerService.issueVC(request.getUserId(), request.getIssuerDid())) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new SuccessResponse(GlobalConstants.STATUS_200, GlobalConstants.MESSAGE_200));
+        }
+        return ResponseEntity
+                .status(HttpStatus.EXPECTATION_FAILED)
+                .body(new SuccessResponse(GlobalConstants.STATUS_417, GlobalConstants.MESSAGE_417_POST));
     }
     @PostMapping("/")
-    public void addIssuer(@RequestBody Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
-        issuerService.addIssuer(issuer);
+    public ResponseEntity<SuccessResponse> addIssuer(@RequestBody Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+        if(issuerService.addIssuer(issuer) != null) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new SuccessResponse(GlobalConstants.STATUS_201, GlobalConstants.MESSAGE_201_Issuer));
+
+        }
+        return ResponseEntity
+                .status(HttpStatus.EXPECTATION_FAILED)
+                .body(new SuccessResponse(GlobalConstants.STATUS_417, GlobalConstants.MESSAGE_417_POST));
     }
 
     @PutMapping("/update/did")
-    public void updateIssuer(@RequestParam("did") String did, @RequestBody Issuer issuer) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
-        issuerService.updateIssuer(did, issuer);
+    public ResponseEntity<SuccessResponse> updateIssuer(@RequestParam("did") String did, @RequestBody Issuer issuer) throws ExecutionException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
+        if(issuerService.updateIssuer(did, issuer)) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new SuccessResponse(GlobalConstants.STATUS_200, GlobalConstants.MESSAGE_200));
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.EXPECTATION_FAILED)
+                .body(new SuccessResponse(GlobalConstants.STATUS_417, GlobalConstants.MESSAGE_417_UPDATE));
     }
 
     @PutMapping("/reject")
-    public void rejectRequest(@RequestBody Request request) throws ExecutionException, InterruptedException {
-        issuerService.rejectRequest(request.getUserId(), request.getIssuerDid());
+    public ResponseEntity<SuccessResponse> rejectRequest(@RequestBody Request request) throws ExecutionException, InterruptedException {
+        if(issuerService.rejectRequest(request.getUserId(), request.getIssuerDid())) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new SuccessResponse(GlobalConstants.STATUS_200, GlobalConstants.MESSAGE_200));
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.EXPECTATION_FAILED)
+                .body(new SuccessResponse(GlobalConstants.STATUS_417, GlobalConstants.MESSAGE_417_DELETE));
     }
 }
