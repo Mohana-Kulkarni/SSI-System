@@ -87,7 +87,7 @@ public class IssuerController {
                 .body(new SuccessResponse(GlobalConstants.STATUS_417, GlobalConstants.MESSAGE_417_POST));
     }
     @PostMapping("/")
-    public ResponseEntity<SuccessResponse> addIssuer(@RequestBody Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+    public ResponseEntity<SuccessResponse> addIssuer(@RequestBody Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, ExecutionException, InterruptedException {
         Map<String, String > map = issuerService.addIssuer(issuer);
         if(map.get("result").equals("true")) {
             return ResponseEntity

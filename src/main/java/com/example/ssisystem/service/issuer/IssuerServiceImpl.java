@@ -44,13 +44,15 @@ public class IssuerServiceImpl implements IssuerService{
         this.encoder = encoder;
     }
     @Override
-    public Map<String, String> addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+    public Map<String, String> addIssuer(Issuer issuer) throws ExecutionException, InterruptedException {
         Map<String, String> res = new HashMap<>();
         try{
-            Issuer issuer1 = getIssuerByWalletId(issuer.getWalletId());
-            if(issuer1 != null) {
-                throw new ResourceAlreadyExistsException("Issuer Already Exists!!!");
-            }
+//            try{
+//                Issuer issuer1 = getIssuerByWalletId(issuer.getWalletId());
+//            } catch (ResourceAlreadyExistsException e) {
+//                throw new ResourceAlreadyExistsException("Issuer Already Exists");
+//            }
+
             String name = issuer.getName();
             String govId = issuer.getGovId();
             String encryptedPassword = encoder.encode(issuer.getPassword());

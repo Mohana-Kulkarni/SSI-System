@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public interface IssuerService {
-    Map<String, String> addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException;
+    Map<String, String> addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, ExecutionException, InterruptedException;
     Issuer getIssuerById(String id) throws ExecutionException, InterruptedException;
     Issuer getIssuerByLogin(String email, String password) throws ExecutionException, InterruptedException;
     Issuer getIssuerByPublicDid(String did) throws ExecutionException, InterruptedException;
