@@ -6,11 +6,9 @@ import com.example.ssisystem.exception.classes.ResourceAlreadyExistsException;
 import com.example.ssisystem.exception.classes.ResourceNotFoundException;
 import com.example.ssisystem.service.did.DIDService;
 import com.example.ssisystem.service.user.UserDetailsService;
-import com.example.ssisystem.service.user.UserDetailsServiceImpl;
 import com.example.ssisystem.service.vc.VCService;
 import com.faunadb.client.FaunaClient;
 import com.faunadb.client.types.Value;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,10 +47,10 @@ public class IssuerServiceImpl implements IssuerService{
     public Map<String, String> addIssuer(Issuer issuer) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         Map<String, String> res = new HashMap<>();
         try{
-//            Issuer issuer1 = getIssuerByWalletId(issuer.getWalletId());
-//            if(issuer1 != null) {
-//                throw new ResourceAlreadyExistsException("Issuer Already Exists!!!");
-//            }
+            Issuer issuer1 = getIssuerByWalletId(issuer.getWalletId());
+            if(issuer1 != null) {
+                throw new ResourceAlreadyExistsException("Issuer Already Exists!!!");
+            }
             String name = issuer.getName();
             String govId = issuer.getGovId();
             String encryptedPassword = encoder.encode(issuer.getPassword());
@@ -81,7 +79,9 @@ public class IssuerServiceImpl implements IssuerService{
             res.put("publicDid", publicDid);
             res.put("id", val.at("ref").get(Value.RefV.class).getId());
             return res;
-        }catch (Exception e) {
+        }catch (ResourceAlreadyExistsException e) {
+            throw new ResourceAlreadyExistsException("Issuer Already Exists!!!");
+        } catch (Exception e){
             throw new RuntimeException(GlobalConstants.MESSAGE_417_POST);
         }
 
@@ -93,7 +93,9 @@ public class IssuerServiceImpl implements IssuerService{
             Value res = faunaClient.query(Get(Ref(Collection("Issuer"), id))).get();
             String issuerType = res.at("data", "type").to(String.class).get();
 
-            return new Issuer(res.at("data", "name").to(String.class).get(),
+            return new Issuer(
+                    res.at("ref").get(Value.RefV.class).getId(),
+                    res.at("data", "name").to(String.class).get(),
                     res.at("data", "email").to(String.class).get(),
                     res.at("data", "govId").to(String.class).get(),
                     issuerType,
@@ -117,11 +119,13 @@ public class IssuerServiceImpl implements IssuerService{
             String encryptedEnteredPassword = encoder.encode(password);
 
             if(!encoder.matches(password, encryptedPassword)) {
-                return null;
+                throw new RuntimeException("Invalid Credentials!!");
             }
             return getIssuerById(res.at("ref").get(Value.RefV.class).getId());
-        } catch (Exception e) {
+        } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException("Issuer", "Email", email);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid Credentials!!");
         }
     }
 
@@ -171,11 +175,16 @@ public class IssuerServiceImpl implements IssuerService{
         try {
             List<UserDetails> requests = new ArrayList<>();
             for(String id: issuer.getPendingRequests()) {
-                UserDetails details = userDetailsService.getUserById(id);
-                requests.add(details);
+                try {
+                    UserDetails details = userDetailsService.getUserById(id);
+                    requests.add(details);
+                } catch (ResourceNotFoundException e) {
+                    throw new ResourceNotFoundException("UserDeails", "id", id);
+                }
             }
             return requests;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new ResourceNotFoundException("Issuer", "id", issuerId);
         }
     }
@@ -354,6 +363,8 @@ public class IssuerServiceImpl implements IssuerService{
             } catch (Exception e) {
                 throw new ResourceNotFoundException("UserDetails", "id", userDetailsId);
             }
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException("UserDetails", "id", userDetailsId);
         } catch (Exception e) {
             throw new ResourceNotFoundException("Issuer", "did", issuerDid);
         }

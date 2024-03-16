@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Issuer implements Serializable {
+    String id;
     String name;
     String email;
     String password;
@@ -15,7 +16,6 @@ public class Issuer implements Serializable {
     private String publicDid;
     private String type;
     private String walletId;
-
     private List<String> pendingRequests;
     private List<String> issuedVCs;
     private List<String> rejectedRequests;
@@ -32,7 +32,8 @@ public class Issuer implements Serializable {
         this.walletId = walletId;
     }
 
-    public Issuer(String name, String email, String govId, String type, String walletId, String publicDid, String privateDid, List<String> issuedVCs, List<String> pendingRequests, List<String> rejectedRequests) {
+    public Issuer(String id, String name, String email, String govId, String type, String walletId, String publicDid, String privateDid, List<String> issuedVCs, List<String> pendingRequests, List<String> rejectedRequests) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.govId = govId;
@@ -128,6 +129,15 @@ public class Issuer implements Serializable {
     public void setWalletId(String walletId) {
         this.walletId = walletId;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
 
 }
 
