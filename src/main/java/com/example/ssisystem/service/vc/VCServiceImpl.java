@@ -95,20 +95,19 @@ public class VCServiceImpl implements VCService{
             Value value = faunaClient.query(Get(Ref(Collection("Verifiable_Credentials"), id))).get();
             String expirationDate = value.at("data", "expirationDate").to(String.class).get();
             String issuanceStr = value.at("data", "proof", "created").to(String.class).get();
-//        UserDetails userDetails = new UserDetails(
-//                value.at("data", "subject", "userDid").to(String.class).get(),
-//                value.at("data", "subject", "firstName").to(String.class).get(),
-//                value.at("data", "subject", "lastName").to(String.class).get(),
-//                value.at("data", "subject", "address").to(String.class).get(),
-//                value.at("data", "subject", "dateOfBirth").to(String.class).get(),
-//                value.at("data", "subject", "gender").to(String.class).get(),
-//                value.at("data", "subject", "placeOfBirth").to(String.class).get(),
-//                value.at("data", "subject", "proofId").to(String.class).get(),
-//                value.at("data", "subject", "docType").to(String.class).get(),
-//                value.at("data", "subject", "verificationResult").collect(VerificationResult.class).stream().toList(),
-//                value.at("data", "subject", "issuedVCs").collect(String.class).stream().toList()
-//        );
-            UserDetails userDetails = (UserDetails) value.at("data", "subject").collect(UserDetails.class).stream();
+            UserDetails userDetails = new UserDetails(
+                    value.at("data", "subject", "userDid").to(String.class).get(),
+                    value.at("data", "subject", "firstName").to(String.class).get(),
+                    value.at("data", "subject", "lastName").to(String.class).get(),
+                    value.at("data", "subject", "address").to(String.class).get(),
+                    value.at("data", "subject", "dateOfBirth").to(String.class).get(),
+                    value.at("data", "subject", "gender").to(String.class).get(),
+                    value.at("data", "subject", "placeOfBirth").to(String.class).get(),
+                    value.at("data", "subject", "proofId").to(String.class).get(),
+                    value.at("data", "subject", "docType").to(String.class).get(),
+                    value.at("data", "subject", "verificationResult").collect(VerificationResult.class).stream().toList(),
+                    value.at("data", "subject", "issuedVCs").collect(String.class).stream().toList()
+            );
             ProofUtil proof = new ProofUtil(
                     value.at("data", "proof", "proofType").to(String.class).get(),
                     value.at("data", "proof", "verificationMethod").to(String.class).get(),
