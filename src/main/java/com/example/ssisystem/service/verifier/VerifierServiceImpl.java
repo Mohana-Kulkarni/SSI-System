@@ -75,11 +75,13 @@ public class VerifierServiceImpl implements VerifierService{
                 map1.put("result", "true");
                 map1.put("id", value.at("ref").get(Value.RefV.class).getId());
                 map1.put("publicDid", publicDid);
-            }
-            else {
+            } else {
                 map1.put("result", "false");
+                throw new ResourceAlreadyExistsException("Verifier Already Exists");
             }
             return map1;
+        } catch (ResourceAlreadyExistsException e) {
+            throw new ResourceAlreadyExistsException("Verifier Already Exists");
         } catch (Exception e) {
             throw new RuntimeException(GlobalConstants.MESSAGE_417_POST);
         }
@@ -89,23 +91,26 @@ public class VerifierServiceImpl implements VerifierService{
     public boolean addTrustedIssuers(String id, String issuerDid) throws ExecutionException, InterruptedException {
         try {
             Verifier verifier = getVerifierById(id);
-            try {
-                issuerService.getIssuerByPublicDid(issuerDid);
-                List<String > trustedIssuer;
-                if(verifier.getTrustedIssuer().isEmpty()) {
-                    trustedIssuer = new ArrayList<>();
-                } else {
-                    trustedIssuer = new ArrayList<>();
-                    trustedIssuer.addAll(verifier.getTrustedIssuer());
-                }
-                trustedIssuer.add(issuerDid);
-                verifier.setTrustedIssuer(trustedIssuer);
-                updateVerifier(id, verifier);
-                System.out.println("Verifier Updated Successfully!!");
-            } catch (Exception e) {
+
+            Issuer issuer = issuerService.getIssuerByPublicDid(issuerDid);
+            if(issuer == null) {
                 throw new ResourceNotFoundException("Issuer", "did", issuerDid);
             }
+            List<String > trustedIssuer;
+            if(verifier.getTrustedIssuer().isEmpty()) {
+                trustedIssuer = new ArrayList<>();
+            } else {
+                trustedIssuer = new ArrayList<>();
+                trustedIssuer.addAll(verifier.getTrustedIssuer());
+            }
+            trustedIssuer.add(issuerDid);
+            verifier.setTrustedIssuer(trustedIssuer);
+            updateVerifier(id, verifier);
+            System.out.println("Verifier Updated Successfully!!");
+
             return true;
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException("Issuer", "did", issuerDid);
         } catch (Exception e) {
             throw new ResourceNotFoundException("Verifier", "id", id);
         }
@@ -135,11 +140,11 @@ public class VerifierServiceImpl implements VerifierService{
             Value res = faunaClient.query(Get(Match(Index("verifier_by_email"), Value(email)))).get();
             String encryptedPassword = res.at("data", "password").to(String.class).get();
 
-            if (encoder.matches(password, encryptedPassword)) {
-                return getVerifierById(res.at("ref").get(Value.RefV.class).getId());
-            } else {
-                return null;
+            if (!encoder.matches(password, encryptedPassword)) {
+                throw new RuntimeException("Invalid Credentials!!");
             }
+            return getVerifierById(res.at("ref").get(Value.RefV.class).getId());
+
         } catch (Exception e) {
             throw new ResourceNotFoundException("Verifier", "email", email);
         }
