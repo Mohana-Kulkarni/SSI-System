@@ -17,16 +17,17 @@ public class VerifiableCredentials {
             this.type = type;
         }
 
-        public VerifiableCredentials(String id, UserDetails details, Issuer issuer, String type, String issuanceDate, String expirationDate, String validFrom, ProofUtil proof) {
-            this.id = id;
-            this.details = details;
-            this.issuer = issuer;
-            this.type = type;
-            this.issuanceDate = issuanceDate;
-            this.expirationDate = expirationDate;
-            this.validFrom = validFrom;
-            this.proof = proof;
-        }
+    public VerifiableCredentials(String id, UserDetails details, Issuer issuer, String type, String issuanceDate, String expirationDate, String validFrom, ProofUtil proof, String status) {
+        this.id = id;
+        this.details = details;
+        this.issuer = issuer;
+        this.type = type;
+        this.issuanceDate = issuanceDate;
+        this.expirationDate = expirationDate;
+        this.validFrom = validFrom;
+        this.proof = proof;
+        this.status = status;
+    }
 
 //    public VerifiableCredentials(String id, UserDetails details, String type, String issuanceDate, String expirationDate, String validFrom, ProofUtil proof) {
 //        this.id = id;

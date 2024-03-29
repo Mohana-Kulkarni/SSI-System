@@ -127,7 +127,8 @@ public class VCServiceImpl implements VCService{
                     issuanceStr,
                     expirationDate,
                     issuanceStr,
-                    proof
+                    proof,
+                    value.at("data", "status").to(String.class).get()
             );
         } catch (Exception e) {
             throw new ResourceNotFoundException("VC", "id", id);
