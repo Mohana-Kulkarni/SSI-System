@@ -2,7 +2,7 @@ package com.example.ssisystem.controller;
 
 import com.example.ssisystem.constants.GlobalConstants;
 import com.example.ssisystem.entity.UserDetails;
-import com.example.ssisystem.entity.VCRequest;
+import com.example.ssisystem.requests.VCRequest;
 import com.example.ssisystem.entity.VerifiableCredentials;
 import com.example.ssisystem.exception.response.SuccessResponse;
 import com.example.ssisystem.service.user.UserDetailsService;

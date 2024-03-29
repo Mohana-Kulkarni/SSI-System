@@ -1,7 +1,7 @@
 package com.example.ssisystem.controller;
 
 import com.example.ssisystem.constants.GlobalConstants;
-import com.example.ssisystem.entity.Credentials;
+import com.example.ssisystem.requests.Credentials;
 import com.example.ssisystem.entity.VerificationResult;
 import com.example.ssisystem.entity.Verifier;
 import com.example.ssisystem.exception.response.SuccessResponse;
