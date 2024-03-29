@@ -41,7 +41,7 @@ public class VCServiceImpl implements VCService{
             String validFrom = issuanceDate;
 
 
-            VerifiableCredentials  vc = new VerifiableCredentials(userDetails, issuer.getPublicDid(), "LD_Proof");
+            VerifiableCredentials  vc = new VerifiableCredentials(userDetails, new Issuer(issuer.getName(), issuer.getPublicDid()), "LD_Proof");
 
             vc.setId(id);
             vc.setExpirationDate(expirationDate);
@@ -68,7 +68,7 @@ public class VCServiceImpl implements VCService{
 
             Map<String, Object> map = new HashMap<>();
             map.put("vcId", vc.getId());
-            map.put("issuer", vc.getIssuerDid());
+            map.put("issuer", vc.getIssuer());
             map.put("subject", vc.getDetails());
             map.put("expirationDate", expirationDate);
             map.put("proof", vc.getProof());
@@ -115,10 +115,14 @@ public class VCServiceImpl implements VCService{
                     value.at("data", "proof", "created").to(String.class).get(),
                     value.at("data", "proof", "proofPurpose").to(String.class).get()
             );
+            Issuer issuer = new Issuer(
+                    value.at("data", "issuer", "name").to(String.class).get(),
+                    value.at("data", "issuer", "publicDid").to(String.class).get()
+            );
             return new VerifiableCredentials(
                     value.at("data", "vcId").to(String.class).get(),
                     userDetails,
-                    value.at("data", "issuer").to(String.class).get(),
+                    issuer,
                     "LD_Proof",
                     issuanceStr,
                     expirationDate,

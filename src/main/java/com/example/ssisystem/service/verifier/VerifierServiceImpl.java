@@ -191,7 +191,7 @@ public class VerifierServiceImpl implements VerifierService{
             VerifiableCredentials vc = vcService.getVcByVCId(vcId);
             try {
                 Verifier verifier = getVerifierById(id);
-                String issuerDid = vc.getIssuerDid();
+                String issuerDid = vc.getIssuer().getPublicDid();
                 try {
                     Issuer issuer = issuerService.getIssuerByPublicDid(issuerDid);
                     List<String> trustedIssuer = verifier.getTrustedIssuer();
