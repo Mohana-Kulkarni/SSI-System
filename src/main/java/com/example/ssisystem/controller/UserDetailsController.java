@@ -2,6 +2,8 @@ package com.example.ssisystem.controller;
 
 import com.example.ssisystem.constants.GlobalConstants;
 import com.example.ssisystem.entity.UserDetails;
+import com.example.ssisystem.entity.VCRequest;
+import com.example.ssisystem.entity.VerifiableCredentials;
 import com.example.ssisystem.exception.response.SuccessResponse;
 import com.example.ssisystem.service.user.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -27,6 +30,20 @@ public class UserDetailsController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userDetailsService.getUserById(id));
+    }
+
+    @GetMapping("/VCS")
+    public ResponseEntity<List<VerifiableCredentials>> getVCsByUserDid(@RequestParam("userDid") String userDid) throws ExecutionException, InterruptedException {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userDetailsService.getAllVCsByUserID(userDid));
+    }
+
+    @PostMapping("/availableVCs")
+    public ResponseEntity<List<VerifiableCredentials>> getAvailableVCs(@RequestBody VCRequest request) throws ExecutionException, InterruptedException {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userDetailsService.getVCsByUserIdAndIssuers(request.getIssuers(), request.getUserDid()));
     }
 
     @PostMapping("/")

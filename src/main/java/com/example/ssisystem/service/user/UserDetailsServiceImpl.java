@@ -2,9 +2,11 @@ package com.example.ssisystem.service.user;
 
 import com.example.ssisystem.constants.GlobalConstants;
 import com.example.ssisystem.entity.UserDetails;
+import com.example.ssisystem.entity.VerifiableCredentials;
 import com.example.ssisystem.entity.VerificationResult;
 import com.example.ssisystem.exception.classes.ResourceNotFoundException;
 import com.example.ssisystem.service.did.DIDService;
+import com.example.ssisystem.service.vc.VCService;
 import com.faunadb.client.FaunaClient;
 import com.faunadb.client.types.Value;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static com.faunadb.client.query.Language.*;
@@ -24,9 +28,11 @@ import static com.faunadb.client.query.Language.Value;
 public class UserDetailsServiceImpl implements UserDetailsService{
     private FaunaClient faunaClient;
     private DIDService didService;
-    public UserDetailsServiceImpl(FaunaClient faunaClient, DIDService didService) {
+    private VCService vcService;
+    public UserDetailsServiceImpl(FaunaClient faunaClient, DIDService didService, VCService vcService) {
         this.faunaClient = faunaClient;
         this.didService = didService;
+        this.vcService = vcService;
     }
     @Override
     public Map<String, String > addUserDetails(UserDetails userDetails) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
@@ -89,6 +95,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     @Override
     public boolean updateUserDetails(String id, UserDetails userDetails) throws ExecutionException, InterruptedException {
         try {
+            getUserById(id);
             try {
                 faunaClient.query(Update
                         (Ref(Collection("UserDetails"), id),
@@ -104,6 +111,57 @@ public class UserDetailsServiceImpl implements UserDetailsService{
             throw new ResourceNotFoundException("UserDetails", "id", id);
         }
 
+    }
+
+    @Override
+    public List<VerifiableCredentials> getAllVCsByUserID(String userDetailsDid) throws ExecutionException, InterruptedException {
+        try {
+            getUserIdByDid(userDetailsDid);
+            try {
+                CompletableFuture<Value> res = faunaClient.query(Paginate(Documents(Collection("Verifiable_Credentials"))));
+                Value value = res.join();
+                List<Value> valueList = value.at("data").collect(Value.class).stream().toList();
+                List<VerifiableCredentials> vcs = new ArrayList<>();
+                for(Value val : valueList) {
+                    VerifiableCredentials vc = vcService.getVCById(((Value.RefV)val).getId());
+                    if (vc.getDetails().getUserDid().equals(userDetailsDid)) {
+                        vcs.add(vc);
+                    }
+                }
+                return vcs;
+            } catch (Exception e) {
+                throw new RuntimeException("VCs not found with id" + userDetailsDid);
+            }
+        }catch (Exception e) {
+            throw new ResourceNotFoundException("UserDetails" , "did", userDetailsDid);
+        }
+    }
+
+    @Override
+    public List<VerifiableCredentials> getVCsByUserIdAndIssuers(List<String> issuers, String userDid) throws ExecutionException, InterruptedException {
+        try {
+            getUserIdByDid(userDid);
+            try {
+                List<VerifiableCredentials> vcList = new ArrayList<>();
+                List<VerifiableCredentials> vcs = getAllVCsByUserID(userDid);
+                for(VerifiableCredentials vc : vcs) {
+                    if(issuers.contains(vc.getIssuer().getPublicDid())) {
+                        vcList.add(vc);
+                    }
+                }
+                return vcList;
+            } catch (Exception e) {
+                throw new RuntimeException("VCs not found with userDid" + userDid);
+            }
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("UserDetails", "did", userDid);
+        }
+    }
+
+
+    public String getUserIdByDid(String did) throws ExecutionException, InterruptedException {
+        Value value = faunaClient.query(Get(Match(Index("user_by_did"), Value(did)))).get();
+        return value.at("ref").get(Value.RefV.class).getId();
     }
 
 }
