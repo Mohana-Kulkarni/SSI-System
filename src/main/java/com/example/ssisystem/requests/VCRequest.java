@@ -1,4 +1,4 @@
-package com.example.ssisystem.entity;
+package com.example.ssisystem.requests;
 
 import java.util.List;
 

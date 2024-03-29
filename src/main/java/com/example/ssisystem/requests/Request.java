@@ -1,4 +1,4 @@
-package com.example.ssisystem.entity;
+package com.example.ssisystem.requests;
 
 public class Request {
     private String userId;
