@@ -4,6 +4,7 @@ import com.example.ssisystem.constants.GlobalConstants;
 import com.example.ssisystem.entity.*;
 import com.example.ssisystem.exception.response.SuccessResponse;
 import com.example.ssisystem.requests.Credentials;
+import com.example.ssisystem.requests.DidRequest;
 import com.example.ssisystem.requests.Request;
 import com.example.ssisystem.service.issuer.IssuerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,13 @@ public class IssuerController {
     @GetMapping("/issued")
     public ResponseEntity<List<VerifiableCredentials>> getIssuedVCs(@RequestParam("id") String id) throws ExecutionException, InterruptedException {
         return ResponseEntity.status(HttpStatus.OK).body(issuerService.getVCsIssuedByIssuer(id));
+    }
+
+    @PostMapping("/trusted")
+    public ResponseEntity<List<Issuer>> getIssuersByDidList(@RequestBody DidRequest request) throws ExecutionException, InterruptedException {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(issuerService.getIssuersFromDidList(request.getIssuersDid()));
     }
     @PostMapping("/login")
     public ResponseEntity<Issuer> getIssuerByLogin(@RequestBody Credentials credentials) throws ExecutionException, InterruptedException {
