@@ -16,6 +16,7 @@ public interface IssuerService {
     Issuer getIssuerByPublicDid(String did) throws ExecutionException, InterruptedException;
     Issuer getIssuerByWalletId(String walletId) throws ExecutionException, InterruptedException;
     List<Issuer> getIssuerByType(String type) throws ExecutionException, InterruptedException;
+    List<Issuer> getIssuersFromDidList(List<String> dids) throws ExecutionException, InterruptedException;
     List<UserDetails> getPendingRequestsByIssuer(String issuerId) throws ExecutionException, InterruptedException;
     List<UserDetails> getRejectedRequestsByIssuer(String issuerId) throws ExecutionException, InterruptedException;
     List<VerifiableCredentials> getVCsIssuedByIssuer(String issuerId) throws ExecutionException, InterruptedException;
@@ -23,7 +24,6 @@ public interface IssuerService {
     boolean addIssuedVCs(String issuerDid,String vcId) throws ExecutionException, InterruptedException;
     boolean updateIssuer(String did, Issuer issuer) throws ExecutionException, InterruptedException;
     boolean issueVC(String userDetailsId, String issuerDid) throws ExecutionException, InterruptedException;
-
     boolean rejectRequest(String userDetailsId, String issuerDid) throws ExecutionException, InterruptedException;
 
 }

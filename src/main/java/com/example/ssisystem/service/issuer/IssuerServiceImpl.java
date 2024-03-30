@@ -172,6 +172,16 @@ public class IssuerServiceImpl implements IssuerService{
     }
 
     @Override
+    public List<Issuer> getIssuersFromDidList(List<String> dids) throws ExecutionException, InterruptedException {
+        List<Issuer> issuers = new ArrayList<>();
+        for (String did: dids) {
+            Issuer issuer = getIssuerByPublicDid(did);
+            issuers.add(issuer);
+        }
+        return issuers;
+    }
+
+    @Override
     public List<UserDetails> getPendingRequestsByIssuer(String issuerId) throws ExecutionException, InterruptedException {
         Issuer issuer = getIssuerById(issuerId);
         try {
@@ -520,6 +530,7 @@ public class IssuerServiceImpl implements IssuerService{
                 map.put("StudentVerification", "passed");
                 result.setPolicy(map);
             }
+
         }
         return result;
     }
