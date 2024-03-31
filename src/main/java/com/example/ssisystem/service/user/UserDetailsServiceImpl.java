@@ -107,6 +107,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         try {
             Value val = faunaClient.query(Get(Ref(Collection("UserDetails"), id))).get();
             return new UserDetails(
+                    val.at("ref").to(Value.RefV.class).get().getId(),
                     val.at("data", "userDid").to(String.class).get(),
                     val.at("data", "firstName").to(String.class).get(),
                     val.at("data", "lastName").to(String.class).get(),

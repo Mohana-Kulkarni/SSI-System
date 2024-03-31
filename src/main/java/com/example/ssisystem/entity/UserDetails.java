@@ -3,6 +3,7 @@ package com.example.ssisystem.entity;
 import java.util.List;
 
 public class UserDetails  {
+    private String id;
     private String userDid;
     private String firstName;
     private String lastName;
@@ -48,7 +49,8 @@ public class UserDetails  {
         this.docType = docType;
     }
 
-    public UserDetails(String userDid, String firstName, String lastName, String address, String dateOfBirth, String gender, String placeOfBirth, String proofId, String docType, List<VerificationResult> verificationResult, List<String> issuedVCs) {
+    public UserDetails(String id, String userDid, String firstName, String lastName, String address, String dateOfBirth, String gender, String placeOfBirth, String proofId, String docType, List<VerificationResult> verificationResult, List<String> issuedVCs) {
+        this.id = id;
         this.userDid = userDid;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -60,6 +62,14 @@ public class UserDetails  {
         this.docType = docType;
         this.verificationResult = verificationResult;
         this.issuedVCs = issuedVCs;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getUserDid() {

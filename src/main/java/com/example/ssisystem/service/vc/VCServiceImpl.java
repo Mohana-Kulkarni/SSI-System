@@ -96,6 +96,7 @@ public class VCServiceImpl implements VCService{
             String expirationDate = value.at("data", "expirationDate").to(String.class).get();
             String issuanceStr = value.at("data", "proof", "created").to(String.class).get();
             UserDetails userDetails = new UserDetails(
+                    value.at("ref").to(Value.RefV.class).get().getId(),
                     value.at("data", "subject", "userDid").to(String.class).get(),
                     value.at("data", "subject", "firstName").to(String.class).get(),
                     value.at("data", "subject", "lastName").to(String.class).get(),
