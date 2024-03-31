@@ -47,8 +47,8 @@ public class UserDetailsController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<SuccessResponse> addUserDetails(@RequestBody UserDetails userDetails) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
-        Map<String, String> result =  userDetailsService.addUserDetails(userDetails);
+    public ResponseEntity<SuccessResponse> addUserDetails(@RequestParam("userId") String userId, @RequestBody UserDetails userDetails) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, ExecutionException, NoSuchProviderException, InterruptedException {
+        Map<String, String> result =  userDetailsService.addUserDetails(userId, userDetails);
         if(result.get("result").equals("true")) {
             return ResponseEntity
                     .status(HttpStatus.OK)

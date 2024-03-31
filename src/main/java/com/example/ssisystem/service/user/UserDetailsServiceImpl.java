@@ -9,7 +9,9 @@ import com.example.ssisystem.service.did.DIDService;
 import com.example.ssisystem.service.vc.VCService;
 import com.faunadb.client.FaunaClient;
 import com.faunadb.client.types.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -29,13 +31,15 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     private FaunaClient faunaClient;
     private DIDService didService;
     private VCService vcService;
-    public UserDetailsServiceImpl(FaunaClient faunaClient, DIDService didService, VCService vcService) {
+    private RestTemplate restTemplate;
+    public UserDetailsServiceImpl(FaunaClient faunaClient, DIDService didService, VCService vcService, RestTemplate restTemplate) {
         this.faunaClient = faunaClient;
         this.didService = didService;
         this.vcService = vcService;
+        this.restTemplate = restTemplate;
     }
     @Override
-    public Map<String, String > addUserDetails(UserDetails userDetails) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+    public Map<String, String> addUserDetails(String userId, UserDetails userDetails) throws ExecutionException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         try {
             String userDid = didService.generatePublicDid();
             userDetails.setUserDid(userDid);
@@ -64,6 +68,34 @@ public class UserDetailsServiceImpl implements UserDetailsService{
             result.put("result", "true");
             result.put("id", id);
             result.put("userDid", userDid);
+
+            String url = "https://ticketing-service-flhm.onrender.com/users/details/?id=%s&detailsId=%s";
+            url = String.format(url, userId, id);
+
+            System.out.println(url);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Create request entity with headers
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("id", userId);
+            requestBody.put("detailsId", id);
+
+            HttpEntity<?> requestEntity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<String> responseEntity = restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    String.class,
+                    userId,
+                    id
+            );
+            // Get response status code and body
+//            HttpStatus statusCode = (HttpStatus) responseEntity.getStatusCode();
+//            String responseBody = responseEntity.getBody();
+//
             return result;
         } catch (Exception e) {
             throw new RuntimeException(GlobalConstants.MESSAGE_417_POST);
