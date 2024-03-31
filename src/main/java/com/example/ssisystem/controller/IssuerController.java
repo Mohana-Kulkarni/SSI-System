@@ -82,7 +82,7 @@ public class IssuerController {
         }
         return ResponseEntity
                 .status(HttpStatus.EXPECTATION_FAILED)
-                .body(new SuccessResponse(GlobalConstants.STATUS_417, GlobalConstants.MESSAGE_417_POST));
+                .body(new SuccessResponse(GlobalConstants.STATUS_417, "Request Already Exists!!"));
     }
 
     @PostMapping("/issueVC")

@@ -266,8 +266,12 @@ public class IssuerServiceImpl implements IssuerService{
             for (String id: issuer.getPendingRequests()) {
                 pendingRequests.add(id);
             }
-            pendingRequests.add(userDetailsId);
-            issuer.setPendingRequests(pendingRequests);
+            if(!pendingRequests.contains(userDetailsId)) {
+                pendingRequests.add(userDetailsId);
+                issuer.setPendingRequests(pendingRequests);
+            } else {
+                return false;
+            }
 
             try {
                 updateIssuer(issuerDid, issuer);
