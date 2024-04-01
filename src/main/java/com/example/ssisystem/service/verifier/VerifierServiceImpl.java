@@ -49,36 +49,31 @@ public class VerifierServiceImpl implements VerifierService{
     @Override
     public Map<String, String> createVerifier(String name, String email, String password, String govId, String walletId) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         try {
-            Verifier verifier = getVerifierByWalletId(walletId);
             Map<String, String> map1 = new HashMap<>();
-            if (verifier == null) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("name", name);
-                map.put("email", email);
-                String encryptedPassword = encoder.encode(password);
-                map.put("password", encryptedPassword);
-                map.put("govId", govId);
-                map.put("walletId", walletId);
-                map.put("trustedIssuer", new ArrayList<>());
-                String privateDid = didServices.generatePrivateDid();
-                String publicDid = didServices.generatePublicDid();
-                map.put("privateDid", privateDid);
-                map.put("publicDid", publicDid);
-                Value value = faunaClient.query(
-                        Create(
-                                Collection("Verifier"),
-                                Obj(
-                                        "data",Value(map)
-                                )
-                        )
-                ).get();
-                map1.put("result", "true");
-                map1.put("id", value.at("ref").get(Value.RefV.class).getId());
-                map1.put("publicDid", publicDid);
-            } else {
-                map1.put("result", "false");
-                throw new ResourceAlreadyExistsException("Verifier Already Exists");
-            }
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", name);
+            map.put("email", email);
+            String encryptedPassword = encoder.encode(password);
+            map.put("password", encryptedPassword);
+            map.put("govId", govId);
+            map.put("walletId", walletId);
+            map.put("trustedIssuer", new ArrayList<>());
+            String privateDid = didServices.generatePrivateDid();
+            String publicDid = didServices.generatePublicDid();
+            map.put("privateDid", privateDid);
+            map.put("publicDid", publicDid);
+            Value value = faunaClient.query(
+                    Create(
+                            Collection("Verifier"),
+                            Obj(
+                                    "data",Value(map)
+                            )
+                    )
+            ).get();
+            map1.put("result", "true");
+            map1.put("id", value.at("ref").get(Value.RefV.class).getId());
+            map1.put("publicDid", publicDid);
+
             return map1;
         } catch (ResourceAlreadyExistsException e) {
             throw new ResourceAlreadyExistsException("Verifier Already Exists");
