@@ -269,10 +269,7 @@ public class IssuerServiceImpl implements IssuerService{
             if(!pendingRequests.contains(userDetailsId)) {
                 pendingRequests.add(userDetailsId);
                 issuer.setPendingRequests(pendingRequests);
-            } else {
-                return false;
             }
-
             try {
                 updateIssuer(issuerDid, issuer);
                 return true;
