@@ -122,7 +122,8 @@ public class VerifierServiceImpl implements VerifierService{
                     value.at("data", "govId").to(String.class).get(),
                     value.at("data", "trustedIssuer").collect(String.class).stream().toList(),
                     value.at("data", "privateDid").to(String.class).get(),
-                    value.at("data", "publicDid").to(String.class).get()
+                    value.at("data", "publicDid").to(String.class).get(),
+                    value.at("data", "walletId").to(String.class).get()
             );
         } catch (Exception e) {
             throw new ResourceNotFoundException("Verifier", "id", id);

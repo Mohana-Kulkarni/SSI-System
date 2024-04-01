@@ -23,7 +23,7 @@ public class Verifier {
         this.password = password;
     }
 
-    public Verifier(String id, String name, String email, String govId, List<String> trustedIssuer, String privateDid, String publicDid) {
+    public Verifier(String id, String name, String email, String govId, List<String> trustedIssuer, String privateDid, String publicDid, String walletId) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -31,6 +31,7 @@ public class Verifier {
         this.trustedIssuer = trustedIssuer;
         this.privateDid = privateDid;
         this.publicDid = publicDid;
+        this.walletId = walletId;
     }
     public String getId() {
         return id;
