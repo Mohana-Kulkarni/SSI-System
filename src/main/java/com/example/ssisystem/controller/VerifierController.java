@@ -48,7 +48,7 @@ public class VerifierController {
         if(map.get("result").equals("true")) {
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(new SuccessResponse(GlobalConstants.STATUS_201, GlobalConstants.MESSAGE_201_Verifier));
+                    .body(new SuccessResponse(GlobalConstants.STATUS_201, map));
         }
         return ResponseEntity
                 .status(HttpStatus.EXPECTATION_FAILED)
