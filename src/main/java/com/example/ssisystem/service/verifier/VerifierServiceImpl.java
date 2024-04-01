@@ -167,10 +167,9 @@ public class VerifierServiceImpl implements VerifierService{
                                     "data",
                                     Obj(
                                             "name", Value(verifier.getName()),
+                                            "email" ,Value(verifier.getEmail()),
                                             "govId", Value(verifier.getGovId()),
-                                            "trustedIssuer", Value(verifier.getTrustedIssuer()),
-                                            "privateDid", Value(verifier.getPrivateDid()),
-                                            "publicDid", Value(verifier.getPublicDid())
+                                            "trustedIssuer", Value(verifier.getTrustedIssuer())
                                     )
                             )
                     )
