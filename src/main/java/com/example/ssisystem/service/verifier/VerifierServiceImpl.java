@@ -160,17 +160,20 @@ public class VerifierServiceImpl implements VerifierService{
     @Override
     public boolean updateVerifier(String id, Verifier verifier) {
         try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", verifier.getName());
+            map.put("email", verifier.getEmail());
+            map.put("govId", verifier.getGovId());
+            map.put("privateDid", verifier.getPrivateDid());
+            map.put("publicDid", verifier.getPublicDid());
+            map.put("trustedIssuer", verifier.getTrustedIssuer());
+            map.put("walletId", verifier.getWalletId());
             faunaClient.query(
                     Update(
                             Ref(Collection("Verifier"), id),
                             Obj(
                                     "data",
-                                    Obj(
-                                            "name", Value(verifier.getName()),
-                                            "email" ,Value(verifier.getEmail()),
-                                            "govId", Value(verifier.getGovId()),
-                                            "trustedIssuer", Value(verifier.getTrustedIssuer())
-                                    )
+                                    Value(map)
                             )
                     )
             );
