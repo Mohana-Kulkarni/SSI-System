@@ -155,19 +155,30 @@ public class VerifierServiceImpl implements VerifierService{
             throw new ResourceNotFoundException("Verifier", "walletId", walletId);
         }
     }
-
-
+//
+//    {
+//        "name": "verifier",
+//            "email": "verifier1@test.com",
+//            "govId": "dkl hng hbaf",
+//            "trustedIssuer": [
+//        "did:ethr:2583f0aacf42a03750069ae34bd3a8afa45d9623"
+//  ]
+//    }393947042027667524
     @Override
     public boolean updateVerifier(String id, Verifier verifier) {
         try {
+            Verifier verifier1 = getVerifierById(id);
             Map<String, Object> map = new HashMap<>();
             map.put("name", verifier.getName());
             map.put("email", verifier.getEmail());
             map.put("govId", verifier.getGovId());
-            map.put("privateDid", verifier.getPrivateDid());
-            map.put("publicDid", verifier.getPublicDid());
-            map.put("trustedIssuer", verifier.getTrustedIssuer());
-            map.put("walletId", verifier.getWalletId());
+            map.put("privateDid", verifier1.getPrivateDid());
+            map.put("publicDid", verifier1.getPublicDid());
+            List<String> trustedIssuers = new ArrayList<>();
+            trustedIssuers.addAll(verifier1.getTrustedIssuer());
+            trustedIssuers.addAll(verifier.getTrustedIssuer());
+            map.put("trustedIssuer", trustedIssuers);
+            map.put("walletId", verifier1.getWalletId());
             faunaClient.query(
                     Update(
                             Ref(Collection("Verifier"), id),
