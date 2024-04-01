@@ -303,7 +303,7 @@ public class IssuerServiceImpl implements IssuerService{
     @Override
     public boolean updateIssuer(String did, Issuer issuer) throws ExecutionException, InterruptedException {
         try {
-            getIssuerByPublicDid(did);
+            Issuer issuer1 = getIssuerByPublicDid(did);
             try {
                 String name = issuer.getName();
                 String govId = issuer.getGovId();
@@ -312,13 +312,13 @@ public class IssuerServiceImpl implements IssuerService{
                 map.put("govId", govId);
                 map.put("email", issuer.getEmail());
                 map.put("type", issuer.getType());
-                map.put("privateDid", issuer.getPrivateDid());
-                map.put("publicDid", issuer.getPublicDid());
-                map.put("pendingRequests", issuer.getPendingRequests());
-                map.put("rejectedRequests", issuer.getRejectedRequests());
-                map.put("issuedVCs", issuer.getIssuedVCs());
+                map.put("privateDid", issuer1.getPrivateDid());
+                map.put("publicDid", issuer1.getPublicDid());
+                map.put("pendingRequests", issuer1.getPendingRequests());
+                map.put("rejectedRequests", issuer1.getRejectedRequests());
+                map.put("issuedVCs", issuer1.getIssuedVCs());
                 faunaClient.query(Update(
-                        Ref(Collection("Issuer"), issuer.getId()),
+                        Ref(Collection("Issuer"), issuer1.getId()),
                         Obj(
                                 "data", Value(map)
                         )
