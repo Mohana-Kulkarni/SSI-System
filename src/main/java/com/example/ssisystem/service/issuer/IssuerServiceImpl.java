@@ -322,7 +322,7 @@ public class IssuerServiceImpl implements IssuerService{
                         Obj(
                                 "data", Value(map)
                         )
-                ));
+                )).join();
                 return true;
             } catch (Exception e) {
                 return false;
