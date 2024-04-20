@@ -305,8 +305,15 @@ public class IssuerServiceImpl implements IssuerService{
         try {
             Issuer issuer1 = getIssuerByPublicDid(did);
             try {
-                String name = issuer.getName();
+               String name = issuer.getName();
                 String govId = issuer.getGovId();
+                List<String> pendingList = new ArrayList<>();
+                pendingList.addAll(issuer.getPendingRequests());
+                List<String> rejectedList = new ArrayList<>();
+                rejectedList.addAll(issuer.getRejectedRequests());
+                List<String> issuedList = new ArrayList<>();
+                issuedList.addAll(issuer.getIssuedVCs());
+
                 Map<String, Object> map = new HashMap<>();
                 map.put("name", name);
                 map.put("govId", govId);
@@ -314,9 +321,9 @@ public class IssuerServiceImpl implements IssuerService{
                 map.put("type", issuer.getType());
                 map.put("privateDid", issuer1.getPrivateDid());
                 map.put("publicDid", issuer1.getPublicDid());
-                map.put("pendingRequests", issuer1.getPendingRequests());
-                map.put("rejectedRequests", issuer1.getRejectedRequests());
-                map.put("issuedVCs", issuer1.getIssuedVCs());
+                map.put("pendingRequests", pendingList);
+                map.put("rejectedRequests", rejectedList);
+                map.put("issuedVCs", issuedList);
                 faunaClient.query(Update(
                         Ref(Collection("Issuer"), issuer1.getId()),
                         Obj(
